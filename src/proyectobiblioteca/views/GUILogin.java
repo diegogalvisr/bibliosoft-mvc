@@ -3,6 +3,8 @@ package proyectobiblioteca.views;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import javax.swing.*;
 import proyectobiblioteca.controllers.adminsDAO;
 
@@ -24,7 +26,7 @@ public class GUILogin extends JFrame {
 
     public GUILogin() {
         initComponents();
-        setSize(600, 400);
+        setSize(800, 400);
         setTitle("Sistema de Biblioteca - Colegio Francisco Jose de Caldas");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
@@ -35,7 +37,7 @@ public class GUILogin extends JFrame {
         panelIzquierda.setBackground(verde);
         panelPrin.setBackground(verdeClaro);
         panelPrin.setPreferredSize(new Dimension(610, 800));
-        panelIzquierda.setPreferredSize(new Dimension(200, 800));
+        panelIzquierda.setPreferredSize(new Dimension(300, 800));
 
         // Configuramos el contenedor principal con un BorderLayout
         container.setLayout(new BorderLayout());
@@ -102,8 +104,35 @@ public class GUILogin extends JFrame {
 
         panelPrin.setLayout(new BorderLayout());
         panelPrin.add(panelLogin, BorderLayout.CENTER);
+        
+        passwordField.addKeyListener(new KeyAdapter() {
+        public void keyPressed(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                String usuario = usuarioField.getText();
+                System.out.println(usuario);
+                System.out.println(passwordField.getText());
+
+                boolean esValido = adminsdao.validarUsuario(usuarioField.getText(), passwordField.getText());
+                if (esValido) {
+                    if (adminsdao.cargo==1) {
+                           JOptionPane.showMessageDialog(null, "Bienvenido al sistema ingresas como Administrador");
+                            GUIPrincipal formPrin=new GUIPrincipal();
+                   formPrin.setVisible(true);
+                   setVisible(false);
+                    }else{
+                    JOptionPane.showMessageDialog(null, "Bienvenido al sistema ingresas como Auxiliar");
+                    /*        GUIPrincipalAuxiliares formPrin=new GUIPrincipalAuxiliares();
+                   formPrin.setVisible(true);
+                   setVisible(false);*/
+                    }
+                  
+                } else {
+                    JOptionPane.showMessageDialog(null, "INCORRECTO");
+                }
+            }
+        }
+    });
         loginButton.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 String usuario = usuarioField.getText();
                 System.out.println(usuario);

@@ -1,6 +1,7 @@
 package proyectobiblioteca.views;
 
 import java.awt.*;
+import static java.awt.Color.blue;
 import java.awt.event.*;
 import java.time.Year;
 import java.util.ArrayList;
@@ -63,7 +64,7 @@ public class GUIPrincipal extends JFrame {
         panelAbajo = new JPanel();
         jLabelTop = new JLabel();
         jLabelTop.setFont(new Font("Agency FB", Font.BOLD, 30));
-        // jLabelTop.setPreferredSize(new Dimension(200, 100)); // establece el tamaño preferido a 200x50 píxeles
+        //jLabelTop.setPreferredSize(new Dimension(200, 100)); // establece el tamaño preferido a 200x50 píxeles
         panelArriba.add(jLabelTop);
 
         panelIzquierda.setBackground(verde);
@@ -76,10 +77,11 @@ public class GUIPrincipal extends JFrame {
         container.setLayout(new BorderLayout());
         panelPrin.setLayout(new BorderLayout());
         panelPrin.add(panelArriba, BorderLayout.NORTH);
-        panelArriba.setPreferredSize(new Dimension(610, 150));
+        panelArriba.setPreferredSize(new Dimension(610, 100
+        ));
         //  panelArriba.add(jLabelTop);
         panelPrin.add(panelAbajo, BorderLayout.SOUTH);
-        panelAbajo.setPreferredSize(new Dimension(610, 600));
+        panelAbajo.setPreferredSize(new Dimension(610, 700));
 
         container.add(panelIzquierda, BorderLayout.WEST);
         container.add(panelPrin, BorderLayout.CENTER);
@@ -243,12 +245,11 @@ public class GUIPrincipal extends JFrame {
                     JOptionPane.showMessageDialog(null, "Es necesario que seleccione un usuario de la tabla para eliminar");
                     return;
                 }
-
-                String usuario = (String) table.getValueAt(filaSeleccionada, 0); // Obtiene el nombre de usuario de la fila seleccionada
-                int confirmacion = JOptionPane.showConfirmDialog(null, "¿Está seguro de eliminar al usuario: " + usuario + "?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+                int id_admin = (int) table.getValueAt(filaSeleccionada, 0);
+                int confirmacion = JOptionPane.showConfirmDialog(null, "¿Está seguro de eliminar al usuario: " + id_admin + "?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
 
                 if (confirmacion == JOptionPane.YES_OPTION) {
-                    ADMINSdao.eliminarAdmin(usuario); // Realiza la eliminación en la base de datos
+                    ADMINSdao.eliminarAdmin(id_admin); // Realiza la eliminación en la base de datos
                     table.setModel(ADMINSdao.tablaAdmins()); // Actualiza la tabla con los nuevos datos
                 }
             }
@@ -632,10 +633,10 @@ public class GUIPrincipal extends JFrame {
         lblCargo.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
         lblCargo.setForeground(new Color(52, 58, 64));
 
-        JComboBox JBCargo = new JComboBox();
-        JBCargo.addItem("Seleccion");
-        JBCargo.addItem("Administrador");
-        JBCargo.addItem("Auxiliar");
+        JComboBox<String> JBCargo = new JComboBox<>();
+
+        // Llamar al método para cargar los autores en el JComboBox
+        adminsDAO.cargarCargos(JBCargo);
         JBCargo.setPreferredSize(new Dimension(250, 30));
         JBCargo.setBackground(Color.white);
         JBCargo.setBorder(BorderFactory.createLineBorder(new Color(108, 117, 125)));
@@ -707,7 +708,7 @@ public class GUIPrincipal extends JFrame {
         enviar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (txtUsuario.getText().isEmpty() || txtClave.getText().isEmpty() || txtNombre.getText().isEmpty() || txtApellido.getText().isEmpty() || txtDireccion.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Todos los campos son requeridos");
+                    JOptionPane.showMessageDialog(null, "Todos los campos son requeridos.", "ERROR 404 - Bibliosoft", JOptionPane.ERROR_MESSAGE);
                 } else {
 
                     adminsDTO nuevoAdmin = new adminsDTO();
@@ -737,8 +738,16 @@ public class GUIPrincipal extends JFrame {
 
         btnGenerarUser.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                txtUsuario.setText(generateUsername(txtNombre.getText(), txtApellido.getText()));
+                String nombre = txtNombre.getText();
+                String apellido = txtApellido.getText();
 
+                if (nombre.isEmpty() || apellido.isEmpty()) {
+                    // Uno o ambos campos están vacíos, muestra un mensaje de error o realiza alguna acción apropiada.
+                    JOptionPane.showMessageDialog(null, "Debes ingresar nombre y apellido para poder generarte el usuario.", "ERROR 404 - Bibliosoft", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    // Ambos campos tienen contenido, genera el usuario.
+                    txtUsuario.setText(generateUsername(nombre, apellido));
+                }
             }
         });
 
@@ -1219,10 +1228,10 @@ public class GUIPrincipal extends JFrame {
         lblCargo.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
         lblCargo.setForeground(new Color(52, 58, 64));
 
-        JComboBox JBCargo = new JComboBox();
-        JBCargo.addItem("Seleccione");
-        JBCargo.addItem("Administrador");
-        JBCargo.addItem("Auxiliar");
+        JComboBox<String> JBCargo = new JComboBox<>();
+
+        // Llamar al método para cargar los autores en el JComboBox
+        adminsDAO.cargarCargos(JBCargo);
 
         JBCargo.setSelectedIndex((int) datosFila.get(6));
         JBCargo.setPreferredSize(new Dimension(250, 30));

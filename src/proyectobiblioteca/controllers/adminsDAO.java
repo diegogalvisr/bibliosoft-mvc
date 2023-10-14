@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import proyectobiblioteca.config.BasedeDatos;
@@ -72,7 +73,7 @@ public class adminsDAO {
                     ADTO.setDireccion(resultado.getString("direccion"));
                     ADTO.setCargo(resultado.getInt("cargo"));
                     // Agregamos los datos al modelo
-                    Object[] fila = {ADTO.getId_admin(),ADTO.getUsuario(), ADTO.getClave(), ADTO.getNombres(), ADTO.getApellidos(), ADTO.getDireccion(), ADTO.getCargo()};
+                    Object[] fila = {ADTO.getId_admin(), ADTO.getUsuario(), ADTO.getClave(), ADTO.getNombres(), ADTO.getApellidos(), ADTO.getDireccion(), ADTO.getCargo()};
                     modelo.addRow(fila);
                 }
             } else {
@@ -163,45 +164,54 @@ public class adminsDAO {
         }
     }
 
-    public static void eliminarAdmin(String usuario) {
-    try {
-        BasedeDatos.conectar();
-        String sql = "SELECT id_admin FROM admins WHERE usuario LIKE ?";
-        int id_admin=0;
-
+    public static void cargarCargos(JComboBox<String> comboBox) {
         try {
             BasedeDatos.conectar();
-            PreparedStatement stmt = BasedeDatos.conexion.prepareStatement(sql);
-            String parametro = "%" + usuario + "%";
-            stmt.setString(1, parametro);
-            ResultSet result = stmt.executeQuery();
+            String consulta = "SELECT nombre FROM cargos";
+            PreparedStatement statement = BasedeDatos.conexion.prepareStatement(consulta);
+            ResultSet resultado = statement.executeQuery();
 
-            if (result != null) {
-                while (result.next()) {
-                    id_admin = result.getInt("id_admin");
+            // Limpiar el JComboBox antes de agregar los nombres de autores
+            comboBox.removeAllItems();
+            comboBox.addItem("Seleccione");
+            while (resultado.next()) {
+                String nombreAutor = resultado.getString("nombre");
+                comboBox.addItem(nombreAutor);
+            }
 
-                }
+            // Cerrar los recursos
+            resultado.close();
+            statement.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            BasedeDatos.desconectar(); // Cerrar la conexión
+        }
+    }
+
+    public static void eliminarAdmin(int id_admin) {
+        try {
+            BasedeDatos.conectar();
+
+            // Realizar la eliminación
+            String consultaEliminacion = "DELETE FROM admins WHERE id_admin = ?";
+            PreparedStatement eliminacionStatement = BasedeDatos.conexion.prepareStatement(consultaEliminacion);
+            eliminacionStatement.setInt(1, id_admin);
+            int filasEliminadas = eliminacionStatement.executeUpdate();
+
+            if (filasEliminadas > 0) {
+                JOptionPane.showMessageDialog(null, "Se ha eliminado el admin con ID: " + id_admin);
+                System.out.println("Se ha eliminado el admin con ID: " + id_admin + " de la BD.");
+            } else {
+                JOptionPane.showMessageDialog(null, "No se encontró un admin con el ID: " + id_admin);
+                System.out.println("No se encontró un admin con el ID: " + id_admin);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Error consultando el usuario");
-        } 
-        
-        // Realizar la eliminación
-        String consultaEliminacion = "DELETE FROM admins WHERE id_admin = ?";
-        PreparedStatement eliminacionStatement = BasedeDatos.conexion.prepareStatement(consultaEliminacion);
-        eliminacionStatement.setInt(1, id_admin);
-        eliminacionStatement.executeUpdate();
-                                        JOptionPane.showMessageDialog(null, "El id del usuario: "+usuario+" es: "+id_admin);
-
-        System.out.println("Se ha eliminado el admin de la BD.");
-    } catch (Exception e) {
-        e.printStackTrace();
-    } finally {
-        BasedeDatos.desconectar(); // Cerrar la conexión
+        } finally {
+            BasedeDatos.desconectar(); // Cerrar la conexión
+        }
     }
-}
-
 
     public static void actualizarAdmin(adminsDTO admin) {
         try {
