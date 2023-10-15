@@ -3,6 +3,7 @@ package proyectobiblioteca.controllers;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import proyectobiblioteca.config.BasedeDatos;
@@ -39,50 +40,73 @@ public class UsuariosDAO {
 
         return users;
     }
-
-    public DefaultTableModel tablaUsers() {
-        DefaultTableModel modelo = new DefaultTableModel();
-
-        // Definimos las columnas del modelo
-        modelo.addColumn("ID");
-        modelo.addColumn("Usuario");
-        modelo.addColumn("Nombre");
-        modelo.addColumn("Apellido");
-        modelo.addColumn("Direccion");
-        modelo.addColumn("Telefono 1");
-        modelo.addColumn("Telefono 2");
-        modelo.addColumn("Grado");
-       /// modelo.addColumn("Multa"); se deshabilita porque no se requiere saber si tiene multa
-
+    
+     public static void cargarGrados(JComboBox<String> comboBox) {
         try {
             BasedeDatos.conectar();
-            ResultSet resultado = BasedeDatos.ejecutarSQL("SELECT * FROM usuarios");
+            String consulta = "SELECT numero FROM grados";
+            PreparedStatement statement = BasedeDatos.conexion.prepareStatement(consulta);
+            ResultSet resultado = statement.executeQuery();
 
-            if (resultado != null) { // Verificar que el resultado no sea null
-                while (resultado.next()) {
-                    int id_usuario = resultado.getInt("id_usuario");
-                    int user_generico = resultado.getInt("user_generico");
-                    String nombre = resultado.getString("nombre");
-                    String apellido = resultado.getString("apellido");
-                    String direccion = resultado.getString("direccion");
-                    String telefono = resultado.getString("telefono");
-                    String telefonoF = resultado.getString("telefonoF");
-                    int grado = resultado.getInt("grado");
-                    int id_multa = resultado.getInt("id_multa");
-
-                    // Agregamos los datos al modelo
-                    Object[] fila = {id_usuario, user_generico, nombre, apellido, direccion, telefono, telefonoF, grado, id_multa};
-                    modelo.addRow(fila);
-                }
-            } else {
-                System.out.println("No se pudo ejecutar la consulta SQL.");
+            // Limpiar el JComboBox antes de agregar los nombres de autores
+            comboBox.removeAllItems();
+            comboBox.addItem("Seleccione");
+            while (resultado.next()) {
+                String nombreAutor = resultado.getString("numero");
+                comboBox.addItem(nombreAutor);
             }
+
+            // Cerrar los recursos
+            resultado.close();
+            statement.close();
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            BasedeDatos.desconectar(); // Cerrar la conexión
         }
-
-        return modelo;
     }
+
+    public DefaultTableModel tablaUsers() {
+    DefaultTableModel modelo = new DefaultTableModel();
+
+    // Definimos las columnas del modelo
+    modelo.addColumn("ID");
+    modelo.addColumn("Usuario Genérico");
+    modelo.addColumn("Nombre");
+    modelo.addColumn("Apellido");
+    modelo.addColumn("Direccion");
+    modelo.addColumn("Telefono 1");
+    modelo.addColumn("Telefono 2");
+    modelo.addColumn("Grado");
+
+    try {
+        BasedeDatos.conectar();
+        ResultSet resultado = BasedeDatos.ejecutarSQL("SELECT us.id_usuario, us.user_generico, us.nombre, us.apellido, us.direccion, us.telefono, us.telefonoF, gr.numero FROM usuarios us JOIN grados gr ON us.grado = gr.id");
+
+        if (resultado != null) { // Verificar que el resultado no sea null
+            while (resultado.next()) {
+                int id_usuario = resultado.getInt("id_usuario");
+                int user_generico = resultado.getInt("user_generico");
+                String nombre = resultado.getString("nombre");
+                String apellido = resultado.getString("apellido");
+                String direccion = resultado.getString("direccion");
+                String telefono = resultado.getString("telefono");
+                String telefonoF = resultado.getString("telefonoF");
+                int grado = resultado.getInt("numero");
+
+                // Agregamos los datos al modelo
+                Object[] fila = {id_usuario, user_generico, nombre, apellido, direccion, telefono, telefonoF, grado};
+                modelo.addRow(fila);
+            }
+        } else {
+            System.out.println("No se pudo ejecutar la consulta SQL.");
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return modelo;
+}
 
     public DefaultTableModel busqueda(String nombreSeleccion) {
         DefaultTableModel modelo = new DefaultTableModel();

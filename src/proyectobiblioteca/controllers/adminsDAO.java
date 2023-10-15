@@ -61,7 +61,7 @@ public class adminsDAO {
 
         try {
             BasedeDatos.conectar();
-            ResultSet resultado = BasedeDatos.ejecutarSQL("SELECT * FROM admins");
+            ResultSet resultado = BasedeDatos.ejecutarSQL("SELECT ad.id_admin,ad.usuario,ad.clave,ad.nombre,ad.apellido,ad.direccion,ad.cargo,cg.nombre as textCargo FROM admins ad JOIN cargos cg ON ad.cargo=cg.id");
             adminsDTO ADTO = new adminsDTO();
             if (resultado != null) { // Verificar que el resultado no sea null
                 while (resultado.next()) {
@@ -71,9 +71,10 @@ public class adminsDAO {
                     ADTO.setNombres(resultado.getString("nombre"));
                     ADTO.setApellidos(resultado.getString("apellido"));
                     ADTO.setDireccion(resultado.getString("direccion"));
-                    ADTO.setCargo(resultado.getInt("cargo"));
+                    ADTO.setTxtCargo(resultado.getString("textCargo"));
+                   // ADTO.setCargo(resultado.getInt("cargo"));
                     // Agregamos los datos al modelo
-                    Object[] fila = {ADTO.getId_admin(), ADTO.getUsuario(), ADTO.getClave(), ADTO.getNombres(), ADTO.getApellidos(), ADTO.getDireccion(), ADTO.getCargo()};
+                    Object[] fila = {ADTO.getId_admin(), ADTO.getUsuario(), ADTO.getClave(), ADTO.getNombres(), ADTO.getApellidos(), ADTO.getDireccion(), ADTO.getTxtCargo()};
                     modelo.addRow(fila);
                 }
             } else {

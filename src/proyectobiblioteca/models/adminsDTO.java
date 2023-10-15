@@ -8,6 +8,7 @@ public class adminsDTO {
     private String apellidos;
     private String direccion;
     private int cargo;
+    private String txtCargo;
     private String cargoTexto;
 
     public adminsDTO() {
@@ -21,6 +22,14 @@ public class adminsDTO {
         this.apellidos = apellidos;
         this.direccion = direccion;
         this.cargo = cargo;
+    }
+
+    public String getTxtCargo() {
+        return txtCargo;
+    }
+
+    public void setTxtCargo(String txtCargo) {
+        this.txtCargo = txtCargo;
     }
 
     public String getCargoTexto() {

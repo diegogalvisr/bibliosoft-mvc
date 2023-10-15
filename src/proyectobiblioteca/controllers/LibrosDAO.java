@@ -53,8 +53,8 @@ public class LibrosDAO {
         modelo.addColumn("ID Libro");
         modelo.addColumn("ISBN");
         modelo.addColumn("Título");
-        modelo.addColumn("Autor");
         modelo.addColumn("Editorial");
+        modelo.addColumn("Autor");
         modelo.addColumn("Tipo de Libro");
         modelo.addColumn("Precio");
         modelo.addColumn("Contenido Material");

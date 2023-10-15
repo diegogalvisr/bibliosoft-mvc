@@ -22,7 +22,7 @@ public static void conectar() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             conexion = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/sistema_biblioteca", "root", "");
+                    "jdbc:mysql://localhost:3306/bdbibliosoft", "root", "");
         } catch (ClassNotFoundException | SQLException ex) {
             Logger.getLogger(BasedeDatos.class.getName()).log(Level.SEVERE, null, ex);
         }

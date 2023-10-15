@@ -216,10 +216,10 @@ public class GUIPrincipal extends JFrame {
         eliminarButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
 // Crear el campo de búsqueda
-        JTextField buscarField = new JTextField(20);
-        buscarField.setMaximumSize(buscarField.getPreferredSize());
+        JTextField buscarField = new JTextField(30);
+        buscarField.setMaximumSize(new Dimension(buscarField.getPreferredSize().width, 40));
         buscarField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
+                BorderFactory.createMatteBorder(1, 1, 1, 1, Color.LIGHT_GRAY),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
 
@@ -346,13 +346,12 @@ public class GUIPrincipal extends JFrame {
         eliminarButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
 // Crear el campo de búsqueda
-        JTextField buscarField = new JTextField(20);
-        buscarField.setMaximumSize(buscarField.getPreferredSize());
+        JTextField buscarField = new JTextField(30);
+        buscarField.setMaximumSize(new Dimension(buscarField.getPreferredSize().width, 40));
         buscarField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
+                BorderFactory.createMatteBorder(1, 1, 1, 1, Color.LIGHT_GRAY),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
-
 // Crear un JPanel para los botones y el campo de búsqueda
         JPanel botonesPanel = new JPanel();
         botonesPanel.setLayout(new BoxLayout(botonesPanel, BoxLayout.X_AXIS));
@@ -771,7 +770,7 @@ public class GUIPrincipal extends JFrame {
         lblTelefono1.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
         lblTelefono1.setForeground(new Color(52, 58, 64));
 
-        JPasswordField txtTelefono1 = new JPasswordField();
+        JTextField txtTelefono1 = new JTextField();
         txtTelefono1.setPreferredSize(new Dimension(250, 30));
         txtTelefono1.setBorder(BorderFactory.createLineBorder(new Color(108, 117, 125)));
 
@@ -820,11 +819,9 @@ public class GUIPrincipal extends JFrame {
         lblGrado.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
         lblGrado.setForeground(new Color(52, 58, 64));
 
-        JComboBox JCGrado = new JComboBox();
-        JCGrado.addItem("601");
-        JCGrado.addItem("602");
-        JCGrado.addItem("603");
-        JCGrado.addItem("604");
+        JComboBox<String> JCGrado = new JComboBox<>();
+        // Llamar al método para cargar los autores en el JComboBox
+        usuariosDAO.cargarGrados(JCGrado);
 
         // Agrega los componentes al panel utilizando un diseño de cuadrícula
         panelAbajo.setLayout(new GridBagLayout());
@@ -909,8 +906,19 @@ public class GUIPrincipal extends JFrame {
                     usersDto.setDireccion(txtDireccion.getText());
                     usersDto.setTelefono(txtTelefono1.getText());
                     usersDto.setTelefonoF(txtTelefono2.getText());
-                    usersDto.setGrado(Integer.parseInt((String) JCGrado.getSelectedItem()));
+                    usersDto.setGrado(JCGrado.getSelectedIndex());
                     usuariosDAO.insertarUser(usersDto);
+
+                    txtUsuario.setText("");
+                    txtNombre.setText("");
+                    txtApellido.setText("");
+                    txtDireccion.setText("");
+                    txtTelefono1.setText("");
+                    txtUsuario.setText("");
+                    txtTelefono2.setText("");
+                    JCGrado.setSelectedIndex(0);
+
+                    accionUsers();
 
                 }
             }
@@ -1100,6 +1108,7 @@ public class GUIPrincipal extends JFrame {
                     libros.setTitulo(txtTitulo.getText());
                     libros.setIdEditorial(JCEeditorial.getSelectedIndex());
                     libros.setIdAutor(JCAutor.getSelectedIndex());
+                    System.out.println("AUTOR A GUARDAR: " + JCAutor.getSelectedIndex());
                     libros.setTipoLibro(txtTPLibro.getText());
                     libros.setPrecio(Integer.parseInt(txtPrecio.getText()));
                     libros.setContMaterial(txtContenido.getText());
@@ -1187,6 +1196,7 @@ public class GUIPrincipal extends JFrame {
         txtUsuario.setText((String) datosFila.get(1));
         txtUsuario.setPreferredSize(new Dimension(250, 30));
         txtUsuario.setBorder(BorderFactory.createLineBorder(new Color(108, 117, 125)));
+        txtUsuario.setEditable(false);
 
         JLabel lblClave = new JLabel("Clave:");
         lblClave.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
@@ -1227,13 +1237,23 @@ public class GUIPrincipal extends JFrame {
         JLabel lblCargo = new JLabel("Cargo:");
         lblCargo.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
         lblCargo.setForeground(new Color(52, 58, 64));
-
+        //Creo el JComboBox del cargo
         JComboBox<String> JBCargo = new JComboBox<>();
-
-        // Llamar al método para cargar los autores en el JComboBox
         adminsDAO.cargarCargos(JBCargo);
+        //Tomo el dato datosFila(6) que me trae el string y realizo la busqueda en el JComboBox y selecciono el indice
+        // una vez encuentro el indice lo establezco como seleccionado predeterminado
+        String cargoBuscado = (String) datosFila.get(6); // Cargo que deseas buscar
+        int itemCount = JBCargo.getItemCount();
+        int foundIndex = -1; // Inicialmente no se ha encontrado el cargo
+        for (int i = 0; i < itemCount; i++) {
+            String item = (String) JBCargo.getItemAt(i);
+            if (item.equals(cargoBuscado)) {
+                foundIndex = i;
+                break; // Sal del bucle una vez que se encuentre el cargo
+            }
+        }
 
-        JBCargo.setSelectedIndex((int) datosFila.get(6));
+        JBCargo.setSelectedIndex(foundIndex);
         JBCargo.setPreferredSize(new Dimension(250, 30));
         JBCargo.setBackground(Color.white);
         JBCargo.setBorder(BorderFactory.createLineBorder(new Color(108, 117, 125)));
@@ -1408,16 +1428,33 @@ public class GUIPrincipal extends JFrame {
         JComboBox<String> JCEeditorial = new JComboBox<>();
         librosDAO.cargarEditoriales(JCEeditorial);
 
+        String cargoBuscado = (String) datosFila.get(3); // Cargo que deseas buscar
+        int itemCount = JCEeditorial.getItemCount();
+        int indexEditorial = -1; // Inicialmente no se ha encontrado el cargo
+        for (int i = 0; i < itemCount; i++) {
+            String item = (String) JCEeditorial.getItemAt(i);
+            if (item.equals(cargoBuscado)) {
+                indexEditorial = i;
+                break; // Sal del bucle una vez que se encuentre el cargo
+            }
+        }
+        JCEeditorial.setSelectedIndex(indexEditorial);
         JLabel lblAutor = new JLabel("Autor:");
         lblAutor.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
         lblAutor.setForeground(new Color(52, 58, 64));
-
         JComboBox<String> JCAutor = new JComboBox<>();
-
-        // Llamar al método para cargar los autores en el JComboBox
         librosDAO.cargarAutores(JCAutor);
-
-        // Agrega los componentes al panel utilizando un diseño de cuadrícula
+        String autorBuscado = (String) datosFila.get(4); // Cargo que deseas buscar
+        int itemCounta = JCAutor.getItemCount();
+        int indexAutor = -1; // Inicialmente no se ha encontrado el cargo
+        for (int i = 0; i < itemCounta; i++) {
+            String item = (String) JCAutor.getItemAt(i);
+            if (item.equals(autorBuscado)) {
+                indexAutor = i;
+                break; // Sal del bucle una vez que se encuentre el cargo
+            }
+        }
+        JCAutor.setSelectedIndex(indexAutor);
         panelAbajo.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
 
@@ -1629,13 +1666,29 @@ public class GUIPrincipal extends JFrame {
         JLabel lblGrado = new JLabel("Grado:");
         lblGrado.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
         lblGrado.setForeground(new Color(52, 58, 64));
+        // creo el combobox para los grados y los cargos desde la BD
+        JComboBox<String> JCGrado = new JComboBox<>();
+// Llamar al método para cargar los datos en el JComboBox
+        usuariosDAO.cargarGrados(JCGrado);
 
-        JComboBox JCGrado = new JComboBox();
-        JCGrado.addItem("601");
-        JCGrado.addItem("602");
-        JCGrado.addItem("603");
-        JCGrado.addItem("604");
-        JCGrado.setSelectedItem(datosFila.get(7));
+        String valorDeseado = String.valueOf(datosFila.get(7)); // Convierte a cadena el valor de datosFila.get(7)
+        int indexDeseado = -1; // Inicializa el índice en -1 (fuera de los límites)
+
+// Busca el índice correspondiente al valor deseado
+        for (int i = 0; i < JCGrado.getItemCount(); i++) {
+            if (valorDeseado.equals(JCGrado.getItemAt(i))) {
+                indexDeseado = i;
+                break; // Detén la búsqueda una vez que encuentres la coincidencia
+            }
+        }
+
+        if (indexDeseado != -1) {
+            JCGrado.setSelectedIndex(indexDeseado); // Establece el índice deseado
+        } else {
+            // El valor deseado no se encontró en el JComboBox
+            // Realiza alguna acción apropiada o muestra un mensaje de error
+            JOptionPane.showMessageDialog(null, "El valor deseado no se encuentra en la lista.");
+        }
 
         // Agrega los componentes al panel utilizando un diseño de cuadrícula
         panelAbajo.setLayout(new GridBagLayout());
@@ -1713,8 +1766,19 @@ public class GUIPrincipal extends JFrame {
                     usersDto.setDireccion(txtDireccion.getText());
                     usersDto.setTelefono(txtTelefono1.getText());
                     usersDto.setTelefonoF(txtTelefono2.getText());
-                    usersDto.setGrado(Integer.parseInt((String) JCGrado.getSelectedItem()));
+                    usersDto.setGrado(JCGrado.getSelectedIndex());
                     UsuariosDAO.actualizarUser(usersDto);
+
+                    txtUsuario.setText("");
+                    txtNombre.setText("");
+                    txtApellido.setText("");
+                    txtDireccion.setText("");
+                    txtTelefono1.setText("");
+                    txtUsuario.setText("");
+                    txtTelefono2.setText("");
+                    JCGrado.setSelectedIndex(0);
+
+                    accionUsers();
 
                 }
             }
