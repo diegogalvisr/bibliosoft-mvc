@@ -89,7 +89,7 @@ public class GUIPrincipal extends JFrame {
         ));
         //  panelArriba.add(jLabelTop);
         panelPrin.add(panelAbajo, BorderLayout.SOUTH);
-        panelAbajo.setPreferredSize(new Dimension(610, 700));
+        panelAbajo.setPreferredSize(new Dimension(610, 600));
 
         container.add(panelIzquierda, BorderLayout.WEST);
         container.add(panelPrin, BorderLayout.CENTER);
@@ -920,7 +920,7 @@ public class GUIPrincipal extends JFrame {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(verdeClaro);
         GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(5,5,5,5);
+        c.insets = new Insets(5, 5, 5, 5);
 
 // Crear el JLabel para la etiqueta "Categoria"
         JLabel lblCategoria = new JLabel("Categoria:");
@@ -936,54 +936,10 @@ public class GUIPrincipal extends JFrame {
         c.gridy = 0;
         panel.add(comboBox, c);
 
-// Crear un JLabel para el cuadro de búsqueda
-        JLabel lblBuscar = new JLabel("Buscar libro:");
-        lblBuscar.setVisible(false);
-        c.gridx = 0;
-        c.gridy = 1;
-        panel.add(lblBuscar, c);
-
-// Crear un JTextField para el cuadro de búsqueda
-        JTextField cuadroBusqueda = new JTextField(30);
-        cuadroBusqueda.setMaximumSize(new Dimension(200, 40));
-        cuadroBusqueda.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(1, 1, 1, 1, Color.LIGHT_GRAY),
-                BorderFactory.createEmptyBorder(5, 5, 5, 5)
-        ));
-        cuadroBusqueda.setVisible(false);
-        c.gridx = 1;
-        c.gridy = 1;
-        panel.add(cuadroBusqueda, c);
-
-// Crear un JLabel para la tabla de libros
-        JLabel lblLibros = new JLabel("Seleccion el libro:");
-        lblLibros.setVisible(false);
-        c.gridx = 0;
-        c.gridy = 2;
-        c.gridwidth = 2;  // Abarca 2 columnas
-        panel.add(lblLibros, c);
-
-// Crear la tabla y un modelo de tabla
-        JTable tabla = new JTable();
-        JScrollPane scrollPane = new JScrollPane(tabla);
-        tabla.setFillsViewportHeight(true);
-        scrollPane.setVisible(false);
-        scrollPane.setPreferredSize(new Dimension(600, 300));
-        c.gridx = 0;
-        c.gridy = 3;
-        c.gridwidth = 2;
-        panel.add(scrollPane, c);
-
-        JCheckBox acta = new JCheckBox("Tiene acta");
-        acta.setVisible(false);
-        c.gridx = 0;
-        c.gridy = 4;
-        panel.add(acta, c);
-
 // Crear un JLabel para el cuadro de búsqueda de usuarios
-        JLabel lblBuscarUsuarios = new JLabel("Buscar Usuario:");
+        JLabel lblBuscarUsuarios = new JLabel("Codigo Usuario:");
         lblBuscarUsuarios.setVisible(false);
-        c.gridx = 3;
+        c.gridx = 2;
         c.gridy = 0;
         panel.add(lblBuscarUsuarios, c);
 
@@ -996,115 +952,110 @@ public class GUIPrincipal extends JFrame {
         ));
         cuadroBusquedaUsuarios.setVisible(false);
         c.gridx = 3;
-        c.gridy = 1;
+        c.gridy = 0;
         panel.add(cuadroBusquedaUsuarios, c);
 
         JLabel lblUsuarioEncontrado = new JLabel();
         lblUsuarioEncontrado.setVisible(false);
         c.gridx = 3;
-        c.gridy = 2;
+        c.gridy = 1;
         panel.add(lblUsuarioEncontrado, c);
 
-        JButton BUSCARUSER = new JButton("Buscar Usuario");
-        BUSCARUSER.setBackground(verde);
-        BUSCARUSER.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-        BUSCARUSER.setVisible(false);
-        c.gridx = 3;
-        c.gridy = 2;
-        panel.add(BUSCARUSER, c);
-
-// Crear un JLabel para el cuadro de búsqueda de usuarios
+        // Crear un JLabel para el cuadro de búsqueda de usuarios
         JLabel lblTipoPrestamo = new JLabel("Tipo:");
         lblTipoPrestamo.setVisible(false);
         c.gridx = 0;
-        c.gridy = 5;
+        c.gridy = 1;
         panel.add(lblTipoPrestamo, c);
 
 // Crear un JTextField para el cuadro de búsqueda de usuarios
-        JTextField cuadroTipoPrest = new JTextField(10);
-        cuadroTipoPrest.setMaximumSize(new Dimension(80, 40));
+        JTextField cuadroTipoPrest = new JTextField(30);
+        cuadroTipoPrest.setMaximumSize(new Dimension(200, 40));
         cuadroTipoPrest.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(1, 1, 1, 1, Color.LIGHT_GRAY),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
         cuadroTipoPrest.setVisible(false);
-        c.gridx = 1;// Colocar el JTextField al lado del JLabel
-        c.gridy = 5;
+        c.gridx = 1;
+        c.gridy = 1;
         panel.add(cuadroTipoPrest, c);
+
+        JLabel lblLibrosS = new JLabel("Buscar:");
+        lblLibrosS.setVisible(false);
+        c.gridx = 1;
+        c.gridy = 2;
+        panel.add(lblLibrosS, c);
+
+        JTextField cuadroBusquedaLibros = new JTextField(30);
+        cuadroBusquedaLibros.setMaximumSize(new Dimension(200, 40));
+        cuadroBusquedaLibros.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(1, 1, 1, 1, Color.LIGHT_GRAY),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+        cuadroBusquedaLibros.setVisible(false);
+        c.gridx = 3;
+        c.gridy = 2;
+        panel.add(cuadroBusquedaLibros, c);
+
+        JTable table = new JTable();
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setVisible(false);
+        scrollPane.setPreferredSize(new Dimension(500, 200));
+        c.gridx = 1;
+        c.gridy = 4;
+        c.gridwidth = 2;
+        panel.add(scrollPane, c);
 
         JButton realizarPrestamo = new JButton("Realizar Prestamo");
         realizarPrestamo.setBackground(verde);
         realizarPrestamo.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         realizarPrestamo.setVisible(false);
         realizarPrestamo.setPreferredSize(new Dimension(200, 100));
-        c.gridx = 3;
-        c.gridy = 5;
+        c.gridx = 1;
+        c.gridy = 6;
         panel.add(realizarPrestamo, c);
-        BUSCARUSER.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (cuadroBusquedaUsuarios.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "No has ingresando el usuario generico arriba.");
-                } else if (PrestamosDAO.obtenerNombreUsuario(Integer.parseInt(cuadroBusquedaUsuarios.getText())).equals("USER NO ENCONTRADO")) {
-                    JOptionPane.showMessageDialog(null, "El usuario no se encuentra registrado.\n"
-                            + "Te redireccionare a que le realices el registro\n"
-                            + "Una vez termines ya puedes continuar con el proceso.\n"
-                            + "Recuerda anotar el usuario que le genero al estudiante.");
-                    accionbtnNuevoUser();
-                } else {
-                    JOptionPane.showMessageDialog(null, "El nombre del usuario es: " + PrestamosDAO.obtenerNombreUsuario(Integer.parseInt(cuadroBusquedaUsuarios.getText())));
-                    BUSCARUSER.setVisible(false);
-                    lblUsuarioEncontrado.setText("Usuario seleccionado: " + PrestamosDAO.obtenerNombreUsuario(Integer.parseInt(cuadroBusquedaUsuarios.getText())));
-                    cuadroBusquedaUsuarios.setEditable(false);
-                    lblUsuarioEncontrado.setVisible(true);
-                }
-
-            }
-        });
-        realizarPrestamo.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                accionUsers();
-            }
-        });
-
         ////////////////////////////////////////////////
         comboBox.setPreferredSize(new Dimension(250, 30));
 
         // Aplicar la decoración de autocompletado al JComboBox
         AutoCompleteDecorator.decorate(comboBox);
 
+        lblBuscarUsuarios.setVisible(true);
+        cuadroBusquedaUsuarios.setEditable(true);
+        cuadroBusquedaUsuarios.setText("");
+        cuadroBusquedaUsuarios.setVisible(true);
+        cuadroTipoPrest.setVisible(true);
+        lblTipoPrestamo.setVisible(true);
+        lblUsuarioEncontrado.setVisible(true);
+        scrollPane.setVisible(true);
+        lblLibrosS.setVisible(true);
+        cuadroBusquedaLibros.setVisible(true);
+
+        realizarPrestamo.setVisible(true);
         comboBox.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int seleccionCat = comboBox.getSelectedIndex();
-                if (seleccionCat >= 1) {
-                    lblBuscar.setVisible(true);
-                    cuadroBusqueda.setVisible(true);
-                    lblBuscarUsuarios.setVisible(true);
-                    cuadroBusquedaUsuarios.setEditable(true);
-                    cuadroBusquedaUsuarios.setText("");
-                    cuadroBusquedaUsuarios.setVisible(true);
-                    lblLibros.setVisible(true);
-                    scrollPane.setVisible(true);
-                    acta.setVisible(true);
-                    BUSCARUSER.setVisible(true);
-                    lblUsuarioEncontrado.setVisible(false);
-                    realizarPrestamo.setVisible(true);
-                    cuadroTipoPrest.setVisible(true);
-                    lblTipoPrestamo.setVisible(true);
-                    tabla.setModel(PrestamosDAO.tablaLibrosDisponibles(comboBox.getSelectedIndex()));
-                } else {
-                    lblBuscarUsuarios.setVisible(false);
-                    cuadroBusquedaUsuarios.setVisible(false);
-                    lblBuscar.setVisible(false);
-                    cuadroBusqueda.setVisible(false);
-                    lblLibros.setVisible(false);
-                    scrollPane.setVisible(false);
-                    acta.setVisible(false);
-                    BUSCARUSER.setVisible(false);
-                    lblUsuarioEncontrado.setVisible(false);
-                    realizarPrestamo.setVisible(false);
-                    cuadroTipoPrest.setVisible(false);
-                    lblTipoPrestamo.setVisible(false);
+                table.setModel(PrestamosDAO.tablaLibrosDisponibles(comboBox.getSelectedIndex()));
 
+            }
+        });
+
+        cuadroBusquedaUsuarios.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    if (cuadroBusquedaUsuarios.getText().isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "No has ingresado el usuario genérico arriba.");
+                    } else if (PrestamosDAO.obtenerNombreUsuario(Integer.parseInt(cuadroBusquedaUsuarios.getText())).equals("USER NO ENCONTRADO")) {
+                        JOptionPane.showMessageDialog(null, "El usuario no se encuentra registrado.\n"
+                                + "Te redireccionaré a que le realices el registro\n"
+                                + "Una vez termines, ya puedes continuar con el proceso.\n"
+                                + "Recuerda anotar el usuario que le generaste al estudiante.");
+                        accionbtnNuevoUser();
+                    } else {
+                        JOptionPane.showMessageDialog(null, "El nombre del usuario es: " + PrestamosDAO.obtenerNombreUsuario(Integer.parseInt(cuadroBusquedaUsuarios.getText())));
+                        lblUsuarioEncontrado.setText("Usuario seleccionado: " + PrestamosDAO.obtenerNombreUsuario(Integer.parseInt(cuadroBusquedaUsuarios.getText())));
+                        cuadroBusquedaUsuarios.setEditable(false);
+                        lblUsuarioEncontrado.setVisible(true);
+                    }
                 }
             }
         });
