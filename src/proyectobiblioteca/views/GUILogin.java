@@ -10,9 +10,9 @@ import proyectobiblioteca.controllers.adminsDAO;
 
 public class GUILogin extends JFrame {
 
-    private final JPanel panelPrin=new JPanel();
-    private final JPanel panelIzquierda=new JPanel();
-     private JPanel panelLogin=new JPanel();
+    private final JPanel panelPrin = new JPanel();
+    private final JPanel panelIzquierda = new JPanel();
+    private JPanel panelLogin = new JPanel();
     private final Color verde = Color.decode("#36b756");
     private final Color verdeClaro = Color.decode("#ffffff");
     private JButton botonHome, botonAdmins;
@@ -21,8 +21,7 @@ public class GUILogin extends JFrame {
     private JPasswordField passwordField;
     private JButton loginButton;
     private final adminsDAO adminsdao = new adminsDAO();
-    private final Container container= getContentPane();
-    
+    private final Container container = getContentPane();
 
     public GUILogin() {
         initComponents();
@@ -45,9 +44,9 @@ public class GUILogin extends JFrame {
         // Agregamos los paneles al contenedor principal
         container.add(panelIzquierda, BorderLayout.WEST);
         container.add(panelPrin, BorderLayout.CENTER);
-        
+
         /////FORMULARIO LOGIN
-            JLabel logo = new JLabel();
+        JLabel logo = new JLabel();
         logo.setIcon(new ImageIcon(getClass().getResource("/resources/logoHome.png")));
         panelIzquierda.setLayout(new BorderLayout());
         panelIzquierda.add(logo, BorderLayout.CENTER);
@@ -104,54 +103,53 @@ public class GUILogin extends JFrame {
 
         panelPrin.setLayout(new BorderLayout());
         panelPrin.add(panelLogin, BorderLayout.CENTER);
-        
-        passwordField.addKeyListener(new KeyAdapter() {
-        public void keyPressed(KeyEvent e) {
-            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                String usuario = usuarioField.getText();
-                System.out.println(usuario);
-                System.out.println(passwordField.getText());
 
-                boolean esValido = adminsdao.validarUsuario(usuarioField.getText(), passwordField.getText());
-                if (esValido) {
-                    if (adminsdao.cargo==1) {
-                           JOptionPane.showMessageDialog(null, "Bienvenido al sistema ingresas como Administrador");
-                            GUIPrincipal formPrin=new GUIPrincipal();
-                   formPrin.setVisible(true);
-                   setVisible(false);
-                    }else{
-                    JOptionPane.showMessageDialog(null, "Bienvenido al sistema ingresas como Auxiliar");
-                    /*        GUIPrincipalAuxiliares formPrin=new GUIPrincipalAuxiliares();
+        passwordField.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    String usuario = usuarioField.getText();
+                    System.out.println(usuario);
+                    System.out.println(passwordField.getText());
+
+                    boolean esValido = adminsdao.validarUsuario(usuarioField.getText(), passwordField.getText());
+                    if (esValido) {
+                        if (adminsdao.cargo == 1) {
+                            JOptionPane.showMessageDialog(null, "Bienvenido al sistema ingresas como Administrador");
+                            GUIPrincipal formPrin = new GUIPrincipal(usuario);
+                            formPrin.setVisible(true);
+                            setVisible(false);
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Bienvenido al sistema ingresas como Auxiliar");
+                            /*        GUIPrincipalAuxiliares formPrin=new GUIPrincipalAuxiliares();
                    formPrin.setVisible(true);
                    setVisible(false);*/
+                        }
+
+                    } else {
+                        JOptionPane.showMessageDialog(null, "INCORRECTO");
                     }
-                  
-                } else {
-                    JOptionPane.showMessageDialog(null, "INCORRECTO");
                 }
             }
-        }
-    });
+        });
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String usuario = usuarioField.getText();
+                GUIPrincipal formPrin = new GUIPrincipal(usuario);
                 System.out.println(usuario);
                 System.out.println(passwordField.getText());
-
                 boolean esValido = adminsdao.validarUsuario(usuarioField.getText(), passwordField.getText());
                 if (esValido) {
-                    if (adminsdao.cargo==1) {
-                           JOptionPane.showMessageDialog(null, "Bienvenido al sistema ingresas como Administrador");
-                            GUIPrincipal formPrin=new GUIPrincipal();
-                   formPrin.setVisible(true);
-                   setVisible(false);
-                    }else{
-                    JOptionPane.showMessageDialog(null, "Bienvenido al sistema ingresas como Auxiliar");
-                    /*        GUIPrincipalAuxiliares formPrin=new GUIPrincipalAuxiliares();
+                    if (adminsdao.cargo == 1) {
+                        JOptionPane.showMessageDialog(null, "Bienvenido al sistema ingresas como Administrador");
+                        formPrin.setVisible(true);
+                        setVisible(false);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Bienvenido al sistema ingresas como Auxiliar");
+                        /*        GUIPrincipalAuxiliares formPrin=new GUIPrincipalAuxiliares();
                    formPrin.setVisible(true);
                    setVisible(false);*/
                     }
-                  
+
                 } else {
                     JOptionPane.showMessageDialog(null, "INCORRECTO");
                 }
@@ -160,7 +158,6 @@ public class GUILogin extends JFrame {
         });
     }
 
-  
     public void pintarPanelIzquierdo() {
         JLabel logo = new JLabel();
         logo.setIcon(new ImageIcon(getClass().getResource("/resources/logoHome.png")));
@@ -183,8 +180,6 @@ public class GUILogin extends JFrame {
         container.add(panelIzquierda, BorderLayout.WEST);
         container.add(panelPrin, BorderLayout.CENTER);
     }
-
-  
 
     public static void main(String[] args) {
         new GUILogin();

@@ -16,6 +16,10 @@ import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicToggleButtonUI;
+import org.jdesktop.swingx.JXComboBox;
+import org.jdesktop.swingx.JXComboBox;
+import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
+import org.jdesktop.swingx.combobox.ListComboBoxModel;
 import proyectobiblioteca.controllers.*;
 import proyectobiblioteca.models.LibrosDTO;
 import proyectobiblioteca.models.UsuariosDTO;
@@ -34,10 +38,14 @@ public class GUIPrincipal extends JFrame {
     private JButton botonHome, botonAdmins, botonUsers, botonLibros;
     private final Container container = getContentPane();
     adminsDAO ADMINSdao = new adminsDAO();
+    PrestamosDAO prestamosDAO = new PrestamosDAO();
     UsuariosDAO usuariosDAO = new UsuariosDAO();
     LibrosDAO librosDAO = new LibrosDAO();
 
-    public GUIPrincipal() {
+    private String usuarioLog;/// me guarda el usuario logeado
+
+    public GUIPrincipal(String user) {
+        this.usuarioLog = user;
         if (!logeo) {
             JOptionPane.showMessageDialog(rootPane, "Debes logearte para ingresar a este menú");
             GUILogin GL = new GUILogin();
@@ -91,6 +99,7 @@ public class GUIPrincipal extends JFrame {
         pintarMenuAdmins();
         pintarMenuUsers();
         pintarMenuLibros();
+        pintarMenuPrestamos();
 
     }
 
@@ -165,6 +174,7 @@ public class GUIPrincipal extends JFrame {
             }
         });
 
+        ////////////////////////
         panelAbajo.setLayout(new FlowLayout());
         panelAbajo.add(botonAdmin);
         panelAbajo.add(botonUser);
@@ -180,6 +190,149 @@ public class GUIPrincipal extends JFrame {
             super.installUI(c);
             // Personaliza la apariencia y el comportamiento del botón aquí
         }
+    }
+
+    private void accionPrestamos() {
+        panelAbajo.removeAll();
+        jLabelTop.setText("dashboard/prestamos");
+
+        // Crear la tabla y configurar sus propiedades
+        JTable table = new JTable(prestamosDAO.tablaPrestamos());
+
+// Configuraciones adicionales
+        table.setRowHeight(30);
+        table.setOpaque(false);
+        table.setBackground(verdeClaro);
+        table.setFont(new Font("Arial", Font.PLAIN, 10));
+        table.setGridColor(Color.LIGHT_GRAY);
+        table.setSelectionBackground(Color.decode("#f3eb55"));
+        table.setSelectionForeground(Color.BLACK);
+
+// Crear e instalar el CustomTableCellRenderer para la columna "Estado"
+        int columnaEstado = 8; // Reemplaza con el número de columna que contiene el estado
+        table.getColumnModel().getColumn(columnaEstado).setCellRenderer(new cambiarColorSegunEstado());
+
+// Agregar la tabla a un JScrollPane
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setPreferredSize(new Dimension(610, 400));
+
+// Configuraciones de la cabecera de la tabla
+        table.getTableHeader().setPreferredSize(new Dimension(scrollPane.getWidth(), 30));
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        table.getTableHeader().setOpaque(false);
+        table.getTableHeader().setBackground(verde);
+        table.getTableHeader().setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+
+// Crear los botones
+        JButton nuevoButton = new JButton("Nuevo");
+        nuevoButton.setBackground(verde);
+        nuevoButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        JButton editarButton = new JButton("Editar");
+        editarButton.setBackground(verde);
+        editarButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        JButton eliminarButton = new JButton("Eliminar");
+        eliminarButton.setBackground(verde);
+        eliminarButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+// Crear el campo de búsqueda
+        JTextField buscarField = new JTextField(30);
+        buscarField.setMaximumSize(new Dimension(buscarField.getPreferredSize().width, 40));
+        buscarField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(1, 1, 1, 1, Color.LIGHT_GRAY),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+
+// Crear un JPanel para los botones y el campo de búsqueda
+        JPanel botonesPanel = new JPanel();
+        botonesPanel.setLayout(new BoxLayout(botonesPanel, BoxLayout.X_AXIS));
+        botonesPanel.setOpaque(false);
+        botonesPanel.setBackground(new Color(0, 0, 0, 0));
+        botonesPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        botonesPanel.add(Box.createHorizontalGlue());
+        botonesPanel.add(buscarField);
+        botonesPanel.add(Box.createRigidArea(new Dimension(10, 0))); // Agregar un espacio entre los botones
+        botonesPanel.add(nuevoButton);
+        botonesPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+        botonesPanel.add(editarButton);
+        botonesPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+        botonesPanel.add(eliminarButton);
+
+        eliminarButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int filaSeleccionada = table.getSelectedRow();
+                if (filaSeleccionada < 0) {
+                    JOptionPane.showMessageDialog(null, "Es necesario que seleccione un usuario de la tabla para eliminar");
+                    return;
+                }
+                int id_admin = (int) table.getValueAt(filaSeleccionada, 0);
+                int confirmacion = JOptionPane.showConfirmDialog(null, "¿Está seguro de eliminar al usuario: " + id_admin + "?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+
+                if (confirmacion == JOptionPane.YES_OPTION) {
+                    ADMINSdao.eliminarAdmin(id_admin); // Realiza la eliminación en la base de datos
+                    table.setModel(ADMINSdao.tablaAdmins()); // Actualiza la tabla con los nuevos datos
+                }
+            }
+        });
+
+        nuevoButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                accionbtnNuevoPrestamo();
+
+            }
+        });
+        editarButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int filaSeleccionada = table.getSelectedRow();
+                if (filaSeleccionada < 0) {
+                    JOptionPane.showMessageDialog(null, "Es necesario que seleccione en la tabla un usuario a modificar");
+                } else {
+                    ArrayList<Object> datosFila = new ArrayList<>();
+
+                    for (int i = 0; i < table.getColumnCount(); i++) {
+                        datosFila.add(table.getValueAt(filaSeleccionada, i));
+                    }
+
+                    accionbtnEditar(datosFila);
+                }
+            }
+        });
+
+        // Agregar el JPanel y el JScrollPane al panelAbajo
+        panelAbajo.setLayout(new BoxLayout(panelAbajo, BoxLayout.Y_AXIS));
+        panelAbajo.add(botonesPanel);
+        panelAbajo.add(Box.createRigidArea(new Dimension(0, 10))); // Agregar un espacio entre los botones y la tabla
+        panelAbajo.add(scrollPane);
+
+        panelAbajo.repaint();
+        panelAbajo.revalidate();
+
+        // Agregar un DocumentListener al campo de búsqueda para detectar cambios en el texto
+        buscarField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                buscar();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                buscar();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                buscar();
+            }
+
+            // Método de búsqueda
+            public void buscar() {
+                String texto = buscarField.getText();
+                table.setModel(prestamosDAO.busqueda(texto));
+                // Crear e instalar el CustomTableCellRenderer para la columna "Estado"
+                int columnaEstado = 8; // Reemplaza con el número de columna que contiene el estado
+                table.getColumnModel().getColumn(columnaEstado).setCellRenderer(new cambiarColorSegunEstado());
+
+            }
+        });
     }
 
     private void accionAdmins() {
@@ -517,13 +670,19 @@ public class GUIPrincipal extends JFrame {
                 table.setModel(librosDAO.obtenerTablaLibros());
             }
         });
-
         nuevoButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 accionbtnNuevoLibro();
 
             }
         });
+        nuevoAutor.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                accionbtnNuevoAutor();
+
+            }
+        });
+
         editarButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 
@@ -755,6 +914,209 @@ public class GUIPrincipal extends JFrame {
         panelAbajo.repaint();
     }
 
+    private void accionbtnNuevoPrestamo() {
+        panelAbajo.removeAll();
+        jLabelTop.setText("dashboard/prestamo/nuevo");
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(verdeClaro);
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets = new Insets(5,5,5,5);
+
+// Crear el JLabel para la etiqueta "Categoria"
+        JLabel lblCategoria = new JLabel("Categoria:");
+        c.gridx = 0;
+        c.gridy = 0;
+        panel.add(lblCategoria, c);
+
+// Crear el JComboBox y cargar las categorías
+        JComboBox<String> comboBox = new JComboBox<>();
+        PrestamosDAO.cargarCategoria(comboBox);
+        comboBox.setPreferredSize(new Dimension(250, 30));
+        c.gridx = 1;
+        c.gridy = 0;
+        panel.add(comboBox, c);
+
+// Crear un JLabel para el cuadro de búsqueda
+        JLabel lblBuscar = new JLabel("Buscar libro:");
+        lblBuscar.setVisible(false);
+        c.gridx = 0;
+        c.gridy = 1;
+        panel.add(lblBuscar, c);
+
+// Crear un JTextField para el cuadro de búsqueda
+        JTextField cuadroBusqueda = new JTextField(30);
+        cuadroBusqueda.setMaximumSize(new Dimension(200, 40));
+        cuadroBusqueda.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(1, 1, 1, 1, Color.LIGHT_GRAY),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+        cuadroBusqueda.setVisible(false);
+        c.gridx = 1;
+        c.gridy = 1;
+        panel.add(cuadroBusqueda, c);
+
+// Crear un JLabel para la tabla de libros
+        JLabel lblLibros = new JLabel("Seleccion el libro:");
+        lblLibros.setVisible(false);
+        c.gridx = 0;
+        c.gridy = 2;
+        c.gridwidth = 2;  // Abarca 2 columnas
+        panel.add(lblLibros, c);
+
+// Crear la tabla y un modelo de tabla
+        JTable tabla = new JTable();
+        JScrollPane scrollPane = new JScrollPane(tabla);
+        tabla.setFillsViewportHeight(true);
+        scrollPane.setVisible(false);
+        scrollPane.setPreferredSize(new Dimension(600, 300));
+        c.gridx = 0;
+        c.gridy = 3;
+        c.gridwidth = 2;
+        panel.add(scrollPane, c);
+
+        JCheckBox acta = new JCheckBox("Tiene acta");
+        acta.setVisible(false);
+        c.gridx = 0;
+        c.gridy = 4;
+        panel.add(acta, c);
+
+// Crear un JLabel para el cuadro de búsqueda de usuarios
+        JLabel lblBuscarUsuarios = new JLabel("Buscar Usuario:");
+        lblBuscarUsuarios.setVisible(false);
+        c.gridx = 3;
+        c.gridy = 0;
+        panel.add(lblBuscarUsuarios, c);
+
+// Crear un JTextField para el cuadro de búsqueda de usuarios
+        JTextField cuadroBusquedaUsuarios = new JTextField(30);
+        cuadroBusquedaUsuarios.setMaximumSize(new Dimension(200, 40));
+        cuadroBusquedaUsuarios.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(1, 1, 1, 1, Color.LIGHT_GRAY),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+        cuadroBusquedaUsuarios.setVisible(false);
+        c.gridx = 3;
+        c.gridy = 1;
+        panel.add(cuadroBusquedaUsuarios, c);
+
+        JLabel lblUsuarioEncontrado = new JLabel();
+        lblUsuarioEncontrado.setVisible(false);
+        c.gridx = 3;
+        c.gridy = 2;
+        panel.add(lblUsuarioEncontrado, c);
+
+        JButton BUSCARUSER = new JButton("Buscar Usuario");
+        BUSCARUSER.setBackground(verde);
+        BUSCARUSER.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        BUSCARUSER.setVisible(false);
+        c.gridx = 3;
+        c.gridy = 2;
+        panel.add(BUSCARUSER, c);
+
+// Crear un JLabel para el cuadro de búsqueda de usuarios
+        JLabel lblTipoPrestamo = new JLabel("Tipo:");
+        lblTipoPrestamo.setVisible(false);
+        c.gridx = 0;
+        c.gridy = 5;
+        panel.add(lblTipoPrestamo, c);
+
+// Crear un JTextField para el cuadro de búsqueda de usuarios
+        JTextField cuadroTipoPrest = new JTextField(10);
+        cuadroTipoPrest.setMaximumSize(new Dimension(80, 40));
+        cuadroTipoPrest.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(1, 1, 1, 1, Color.LIGHT_GRAY),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+        cuadroTipoPrest.setVisible(false);
+        c.gridx = 1;// Colocar el JTextField al lado del JLabel
+        c.gridy = 5;
+        panel.add(cuadroTipoPrest, c);
+
+        JButton realizarPrestamo = new JButton("Realizar Prestamo");
+        realizarPrestamo.setBackground(verde);
+        realizarPrestamo.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        realizarPrestamo.setVisible(false);
+        realizarPrestamo.setPreferredSize(new Dimension(200, 100));
+        c.gridx = 3;
+        c.gridy = 5;
+        panel.add(realizarPrestamo, c);
+        BUSCARUSER.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (cuadroBusquedaUsuarios.getText().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "No has ingresando el usuario generico arriba.");
+                } else if (PrestamosDAO.obtenerNombreUsuario(Integer.parseInt(cuadroBusquedaUsuarios.getText())).equals("USER NO ENCONTRADO")) {
+                    JOptionPane.showMessageDialog(null, "El usuario no se encuentra registrado.\n"
+                            + "Te redireccionare a que le realices el registro\n"
+                            + "Una vez termines ya puedes continuar con el proceso.\n"
+                            + "Recuerda anotar el usuario que le genero al estudiante.");
+                    accionbtnNuevoUser();
+                } else {
+                    JOptionPane.showMessageDialog(null, "El nombre del usuario es: " + PrestamosDAO.obtenerNombreUsuario(Integer.parseInt(cuadroBusquedaUsuarios.getText())));
+                    BUSCARUSER.setVisible(false);
+                    lblUsuarioEncontrado.setText("Usuario seleccionado: " + PrestamosDAO.obtenerNombreUsuario(Integer.parseInt(cuadroBusquedaUsuarios.getText())));
+                    cuadroBusquedaUsuarios.setEditable(false);
+                    lblUsuarioEncontrado.setVisible(true);
+                }
+
+            }
+        });
+        realizarPrestamo.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                accionUsers();
+            }
+        });
+
+        ////////////////////////////////////////////////
+        comboBox.setPreferredSize(new Dimension(250, 30));
+
+        // Aplicar la decoración de autocompletado al JComboBox
+        AutoCompleteDecorator.decorate(comboBox);
+
+        comboBox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int seleccionCat = comboBox.getSelectedIndex();
+                if (seleccionCat >= 1) {
+                    lblBuscar.setVisible(true);
+                    cuadroBusqueda.setVisible(true);
+                    lblBuscarUsuarios.setVisible(true);
+                    cuadroBusquedaUsuarios.setEditable(true);
+                    cuadroBusquedaUsuarios.setText("");
+                    cuadroBusquedaUsuarios.setVisible(true);
+                    lblLibros.setVisible(true);
+                    scrollPane.setVisible(true);
+                    acta.setVisible(true);
+                    BUSCARUSER.setVisible(true);
+                    lblUsuarioEncontrado.setVisible(false);
+                    realizarPrestamo.setVisible(true);
+                    cuadroTipoPrest.setVisible(true);
+                    lblTipoPrestamo.setVisible(true);
+                    tabla.setModel(PrestamosDAO.tablaLibrosDisponibles(comboBox.getSelectedIndex()));
+                } else {
+                    lblBuscarUsuarios.setVisible(false);
+                    cuadroBusquedaUsuarios.setVisible(false);
+                    lblBuscar.setVisible(false);
+                    cuadroBusqueda.setVisible(false);
+                    lblLibros.setVisible(false);
+                    scrollPane.setVisible(false);
+                    acta.setVisible(false);
+                    BUSCARUSER.setVisible(false);
+                    lblUsuarioEncontrado.setVisible(false);
+                    realizarPrestamo.setVisible(false);
+                    cuadroTipoPrest.setVisible(false);
+                    lblTipoPrestamo.setVisible(false);
+
+                }
+            }
+        });
+
+        // Agregar el panel al contenedor
+        panelAbajo.add(panel);
+
+        // Actualizar la interfaz gráfica
+        panelAbajo.revalidate();
+        panelAbajo.repaint();
+    }
+
     private void accionbtnNuevoUser() {
         panelAbajo.removeAll();
         jLabelTop.setText("dashboard/usuarios/nuevo");
@@ -945,6 +1307,212 @@ public class GUIPrincipal extends JFrame {
     private void accionbtnNuevoLibro() {
         panelAbajo.removeAll();
         jLabelTop.setText("dashboard/libros/nuevo");
+
+        // Agrega las referencias a los archivos CSS y JavaScript de Bootstrap Switch
+        JLabel bootstrapSwitchCss = new JLabel();
+        bootstrapSwitchCss.setText("<html><head><link rel='stylesheet' href='lib/bootstrap-switch.min.css'></head><body></body></html>");
+        JLabel bootstrapSwitchJs = new JLabel();
+        bootstrapSwitchJs.setText("<html><head><script src='lib/bootstrap-switch.min.js'></script></head><body></body></html>");
+        // Crea los componentes del formulario utilizando las clases de estilo de Bootstrap
+
+        JLabel lblContenido = new JLabel("Contenido:");
+        lblContenido.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
+        lblContenido.setForeground(new Color(52, 58, 64));
+
+        JTextField txtContenido = new JTextField();
+        txtContenido.setPreferredSize(new Dimension(250, 30));
+        txtContenido.setBorder(BorderFactory.createLineBorder(new Color(108, 117, 125)));
+
+        JLabel lblCategoria = new JLabel("Categoria:");
+        lblCategoria.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
+        lblCategoria.setForeground(new Color(52, 58, 64));
+
+        JTextField txtCategoria = new JTextField();
+        txtCategoria.setPreferredSize(new Dimension(250, 30));
+        txtCategoria.setBorder(BorderFactory.createLineBorder(new Color(108, 117, 125)));
+
+        JLabel lblCantidad = new JLabel("Cantidad:");
+        lblCantidad.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
+        lblCantidad.setForeground(new Color(52, 58, 64));
+
+        JTextField txtCantidad = new JTextField();
+        txtCantidad.setPreferredSize(new Dimension(250, 30));
+        txtCantidad.setBorder(BorderFactory.createLineBorder(new Color(108, 117, 125)));
+
+        JLabel lblISBN = new JLabel("ISBN:");
+        lblISBN.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
+        lblISBN.setForeground(new Color(52, 58, 64));
+
+        JTextField txtISBN = new JTextField();
+        txtISBN.setPreferredSize(new Dimension(250, 30));
+        txtISBN.setBorder(BorderFactory.createLineBorder(new Color(108, 117, 125)));
+
+        JLabel lblTitulo = new JLabel("Titulo:");
+        lblTitulo.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
+        lblTitulo.setForeground(new Color(52, 58, 64));
+
+        JTextField txtTitulo = new JTextField();
+        txtTitulo.setPreferredSize(new Dimension(250, 30));
+        txtTitulo.setBorder(BorderFactory.createLineBorder(new Color(108, 117, 125)));
+
+        JLabel lblTPLibro = new JLabel("Tipo de libro:");
+        lblTPLibro.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
+        lblTPLibro.setForeground(new Color(52, 58, 64));
+
+        JTextField txtTPLibro = new JTextField();
+        txtTPLibro.setPreferredSize(new Dimension(250, 30));
+        txtTPLibro.setBorder(BorderFactory.createLineBorder(new Color(108, 117, 125)));
+
+        JLabel lblPrecio = new JLabel("Precio:");
+        lblPrecio.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
+        lblPrecio.setForeground(new Color(52, 58, 64));
+
+        JTextField txtPrecio = new JTextField();
+        txtPrecio.setPreferredSize(new Dimension(250, 30));
+        txtPrecio.setBorder(BorderFactory.createLineBorder(new Color(108, 117, 125)));
+        ///validacion de txtPrecio que sea numero
+
+        JLabel lblEditorial = new JLabel("Editorial:");
+        lblEditorial.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
+        lblEditorial.setForeground(new Color(52, 58, 64));
+
+        JComboBox<String> JCEeditorial = new JComboBox<>();
+        librosDAO.cargarEditoriales(JCEeditorial);
+
+        JLabel lblAutor = new JLabel("Autor:");
+        lblAutor.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
+        lblAutor.setForeground(new Color(52, 58, 64));
+
+        JComboBox<String> JCAutor = new JComboBox<>();
+
+        // Llamar al método para cargar los autores en el JComboBox
+        librosDAO.cargarAutores(JCAutor);
+
+        // Agrega los componentes al panel utilizando un diseño de cuadrícula
+        panelAbajo.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(10, 10, 10, 10);
+        panelAbajo.add(lblISBN, gbc);
+        gbc.gridx = 1;
+        panelAbajo.add(txtISBN, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        panelAbajo.add(lblTitulo, gbc);
+        gbc.gridx = 1;
+        panelAbajo.add(txtTitulo, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        panelAbajo.add(lblAutor, gbc);
+        gbc.gridx = 1;
+        panelAbajo.add(JCAutor, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        panelAbajo.add(lblEditorial, gbc);
+        gbc.gridx = 1;
+        panelAbajo.add(JCEeditorial, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        panelAbajo.add(lblTPLibro, gbc);
+        gbc.gridx = 1;
+        panelAbajo.add(txtTPLibro, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        panelAbajo.add(lblPrecio, gbc);
+        gbc.gridx = 1;
+        panelAbajo.add(txtPrecio, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        panelAbajo.add(lblContenido, gbc);
+        gbc.gridx = 1;
+        panelAbajo.add(txtContenido, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 7;
+        panelAbajo.add(lblCategoria, gbc);
+        gbc.gridx = 1;
+        panelAbajo.add(txtCategoria, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 8;
+        panelAbajo.add(lblCantidad, gbc);
+        gbc.gridx = 1;
+        panelAbajo.add(txtCantidad, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 9;
+
+        JButton enviar = new JButton("Enviar");
+        enviar.setPreferredSize(new Dimension(250, 30));
+        enviar.setBackground(verde);
+        enviar.setForeground(Color.WHITE);
+        enviar.setBorder(BorderFactory.createLineBorder(new Color(108, 117, 125)));
+        gbc.gridx = 1;
+        gbc.gridy = 10;
+        panelAbajo.add(enviar, gbc);
+        JButton btnRegresar = new JButton("Regresar");
+        btnRegresar.setPreferredSize(new Dimension(250, 30));
+        btnRegresar.setBackground(verde);
+        btnRegresar.setForeground(Color.WHITE);
+        btnRegresar.setBorder(BorderFactory.createLineBorder(new Color(108, 117, 125)));
+        gbc.gridx = 1;
+        gbc.gridy = 11;
+        panelAbajo.add(btnRegresar, gbc);
+
+        // Agrega los archivos CSS y JavaScript de Bootstrap Switch al panel
+        panelAbajo.add(bootstrapSwitchCss);
+        panelAbajo.add(bootstrapSwitchJs);
+
+        enviar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (txtISBN.getText().isEmpty() || txtTitulo.getText().isEmpty() || txtCategoria.getText().isEmpty() || txtContenido.getText().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Todos los campos son requeridos");
+                } else {
+                    LibrosDTO libros = new LibrosDTO();
+                    libros.setIsbn(Integer.parseInt(txtISBN.getText()));
+                    libros.setTitulo(txtTitulo.getText());
+                    libros.setIdEditorial(JCEeditorial.getSelectedIndex());
+                    libros.setIdAutor(JCAutor.getSelectedIndex());
+                    System.out.println("AUTOR A GUARDAR: " + JCAutor.getSelectedIndex());
+                    libros.setTipoLibro(txtTPLibro.getText());
+                    libros.setPrecio(Integer.parseInt(txtPrecio.getText()));
+                    libros.setContMaterial(txtContenido.getText());
+                    libros.setCategoria(txtCategoria.getText());
+                    libros.setCantidad(Integer.parseInt(txtCantidad.getText()));
+                    librosDAO.insertarLibro(libros);
+
+                    txtISBN.setText("");
+                    txtTitulo.setText("");
+                    txtTPLibro.setText("");
+                    txtPrecio.setText("");
+                    txtContenido.setText("");
+                    txtCategoria.setText("");
+                    txtCantidad.setText("");
+
+                    accionLibros();
+
+                }
+            }
+        });
+
+        btnRegresar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                accionLibros();
+            }
+        });
+
+        /* btnGenerarUser.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                txtUsuario.setText(Integer.toString(generarUsuario()));
+
+            }
+        });*/
+        // Actualiza la interfaz gráfica
+        panelAbajo.revalidate();
+        panelAbajo.repaint();
+    }
+
+    private void accionbtnNuevoAutor() {
+        panelAbajo.removeAll();
+        jLabelTop.setText("dashboard/libros/nuevo/autor");
 
         // Agrega las referencias a los archivos CSS y JavaScript de Bootstrap Switch
         JLabel bootstrapSwitchCss = new JLabel();
@@ -1569,7 +2137,6 @@ public class GUIPrincipal extends JFrame {
                     libros.setCategoria(txtCategoria.getText());
                     libros.setCantidad(Integer.parseInt(txtCantidad.getText()));
                     librosDAO.actualizarLibro(libros);
-
                     txtISBN.setText("");
                     txtTitulo.setText("");
                     txtTPLibro.setText("");
@@ -1577,7 +2144,6 @@ public class GUIPrincipal extends JFrame {
                     txtContenido.setText("");
                     txtCategoria.setText("");
                     txtCantidad.setText("");
-
                 }
             }
         });
@@ -1827,6 +2393,22 @@ public class GUIPrincipal extends JFrame {
         });
     }
 
+    private void pintarMenuPrestamos() {
+        botonAdmins = new JButton();
+        botonAdmins.setPreferredSize(new Dimension(300, 50));
+        botonAdmins.setContentAreaFilled(false); // Quitar el relleno del botón
+        botonAdmins.setOpaque(true);
+        botonAdmins.setBackground(verdeClaro);
+        botonAdmins.setText("Prestamos");
+        panelIzquierda.add(botonAdmins);
+        botonAdmins.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                System.out.println("Se dio click en  boton Prestamos");
+                accionPrestamos();
+            }
+        });
+    }
+
     private void pintarMenuUsers() {
         botonUsers = new JButton();
         botonUsers.setPreferredSize(new Dimension(300, 50));
@@ -1866,7 +2448,4 @@ public class GUIPrincipal extends JFrame {
         panelIzquierda.add(logo);
     }
 
-    public static void main(String[] args) {
-        new GUIPrincipal();
-    }
 }

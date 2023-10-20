@@ -11,11 +11,12 @@ public class LibrosDTO {
     private String contMaterial;
     private String categoria;
     private int cantidad;
+    private int prestado;
 
     public LibrosDTO() {
     }
 
-    public LibrosDTO(int idLibro, int isbn, String titulo, int idEditorial, int idAutor, String tipoLibro, int precio, String contMaterial, String categoria, int cantidad) {
+    public LibrosDTO(int idLibro, int isbn, String titulo, int idEditorial, int idAutor, String tipoLibro, int precio, String contMaterial, String categoria, int cantidad, int prestado) {
         this.idLibro = idLibro;
         this.isbn = isbn;
         this.titulo = titulo;
@@ -26,6 +27,7 @@ public class LibrosDTO {
         this.contMaterial = contMaterial;
         this.categoria = categoria;
         this.cantidad = cantidad;
+        this.prestado = prestado;
     }
 
     public int getIdLibro() {
@@ -107,4 +109,16 @@ public class LibrosDTO {
     public void setCantidad(int cantidad) {
         this.cantidad = cantidad;
     }
+
+    public int getPrestado() {
+        return prestado;
+    }
+
+    public void setPrestado(int prestado) {
+        this.prestado = prestado;
+    }
+    
+    
+
+
 }

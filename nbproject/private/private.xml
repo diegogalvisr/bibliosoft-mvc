@@ -3,11 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/juang/OneDrive/Documentos/bibliosoft-mvc/src/proyectobiblioteca/models/adminsDTO.java</file>
-            <file>file:/C:/Users/juang/OneDrive/Documentos/bibliosoft-mvc/src/proyectobiblioteca/controllers/adminsDAO.java</file>
-            <file>file:/C:/Users/juang/OneDrive/Documentos/bibliosoft-mvc/src/proyectobiblioteca/views/GUILogin.java</file>
+            <file>file:/C:/Users/juang/OneDrive/Documentos/bibliosoft-mvc/src/proyectobiblioteca/controllers/PrestamosDAO.java</file>
+            <file>file:/C:/Users/juang/OneDrive/Documentos/bibliosoft-mvc/src/proyectobiblioteca/controllers/LibrosDAO.java</file>
             <file>file:/C:/Users/juang/OneDrive/Documentos/bibliosoft-mvc/src/proyectobiblioteca/views/GUIPrincipal.java</file>
-            <file>file:/C:/Users/juang/OneDrive/Documentos/bibliosoft-mvc/src/proyectobiblioteca/config/BasedeDatos.java</file>
         </group>
     </open-files>
 </project-private>

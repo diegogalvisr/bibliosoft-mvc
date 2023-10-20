@@ -90,55 +90,59 @@ public class adminsDAO {
     }
 
     public DefaultTableModel busqueda(String nombreSeleccion) {
-        DefaultTableModel modelo = new DefaultTableModel();
+    DefaultTableModel modelo = new DefaultTableModel();
 
-        // Definimos las columnas del modelo
-        modelo.addColumn("ID");
-        modelo.addColumn("Usuario");
-        modelo.addColumn("Clave");
-        modelo.addColumn("Nombre");
-        modelo.addColumn("Apellido");
-        modelo.addColumn("Direccion");
-        modelo.addColumn("Cargo");
+    // Definimos las columnas del modelo
+    modelo.addColumn("ID");
+    modelo.addColumn("Usuario");
+    modelo.addColumn("Clave");
+    modelo.addColumn("Nombre");
+    modelo.addColumn("Apellido");
+    modelo.addColumn("Direccion");
+    modelo.addColumn("Cargo");
 
-        String sql = "SELECT id_admin, usuario, clave, nombre, apellido, direccion, cargo FROM admins WHERE id_admin LIKE ? OR usuario LIKE ? OR nombre LIKE ? OR cargo LIKE ? OR apellido LIKE ?";
+    String sql = "SELECT ad.id_admin, ad.usuario, ad.clave, ad.nombre, ad.apellido, ad.direccion, cg.nombre AS textCargo " +
+                 "FROM admins ad " +
+                 "JOIN cargos cg ON ad.cargo = cg.id " +
+                 "WHERE ad.id_admin LIKE ? OR ad.usuario LIKE ? OR ad.nombre LIKE ? OR ad.apellido LIKE ? OR cg.nombre LIKE ?";
 
-        try {
-            BasedeDatos.conectar();
-            PreparedStatement stmt = BasedeDatos.conexion.prepareStatement(sql);
-            String parametro = "%" + nombreSeleccion + "%";
-            stmt.setString(1, parametro);
-            stmt.setString(2, parametro);
-            stmt.setString(3, parametro);
-            stmt.setString(4, parametro);
-            stmt.setString(5, parametro);
+    try {
+        BasedeDatos.conectar();
+        PreparedStatement stmt = BasedeDatos.conexion.prepareStatement(sql);
+        String parametro = "%" + nombreSeleccion + "%";
+        stmt.setString(1, parametro);
+        stmt.setString(2, parametro);
+        stmt.setString(3, parametro);
+        stmt.setString(4, parametro);
+        stmt.setString(5, parametro); // Cambia "ADMINISTRADOR" por el valor deseado
 
-            ResultSet result = stmt.executeQuery();
+        ResultSet result = stmt.executeQuery();
 
-            if (result != null) {
-                while (result.next()) {
-                    int id_admin = result.getInt("id_admin");
-                    String usuario = result.getString("usuario");
-                    String clave = result.getString("clave");
-                    String nombre = result.getString("nombre");
-                    String apellido = result.getString("apellido");
-                    String direccion = result.getString("direccion");
-                    int cargo = result.getInt("cargo");
+        if (result != null) {
+            while (result.next()) {
+                int id_admin = result.getInt("id_admin");
+                String usuario = result.getString("usuario");
+                String clave = result.getString("clave");
+                String nombre = result.getString("nombre");
+                String apellido = result.getString("apellido");
+                String direccion = result.getString("direccion");
+                String cargo = result.getString("textCargo");
 
-                    // Agregamos los datos al modelo
-                    Object[] fila = {id_admin, usuario, clave, nombre, apellido, direccion, cargo};
-                    modelo.addRow(fila);
-                }
+                // Agregamos los datos al modelo
+                Object[] fila = {id_admin, usuario, clave, nombre, apellido, direccion, cargo};
+                modelo.addRow(fila);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Error consultando admins");
-        } finally {
-            BasedeDatos.desconectar(); // Cerrar la conexión
         }
-
-        return modelo;
+    } catch (Exception e) {
+        e.printStackTrace();
+        System.out.println("Error consultando admins");
+    } finally {
+        BasedeDatos.desconectar(); // Cerrar la conexión
     }
+
+    return modelo;
+}
+
 
     public static void insertarAdmin(adminsDTO admin) {
         try {

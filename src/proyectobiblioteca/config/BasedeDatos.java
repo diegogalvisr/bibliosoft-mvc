@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 public class BasedeDatos {
 
@@ -24,7 +25,10 @@ public static void conectar() {
             conexion = DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/bdbibliosoft", "root", "");
         } catch (ClassNotFoundException | SQLException ex) {
-            Logger.getLogger(BasedeDatos.class.getName()).log(Level.SEVERE, null, ex);
+             String logMessage = "Ocurrió un error: " + ex.getMessage()+" \nPonte en contacto con el administrador del sistema."; // Puedes personalizar el mensaje según tus necesidades
+    // Mostrar el mensaje de registro en un JOptionPane
+    JOptionPane.showMessageDialog(null, logMessage, "Error Conexion a la BD - Bibliosoft", JOptionPane.ERROR_MESSAGE);
+
         }
     }
 
