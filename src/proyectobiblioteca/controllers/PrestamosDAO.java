@@ -38,6 +38,31 @@ public class PrestamosDAO {
             BasedeDatos.desconectar(); // Cerrar la conexión
         }
     }
+    
+    public static void cargarAsignatura(JComboBox<String> comboBox) {
+        try {
+            BasedeDatos.conectar();
+            String consulta = "SELECT nombre FROM asignatura";
+            PreparedStatement statement = BasedeDatos.conexion.prepareStatement(consulta);
+            ResultSet resultado = statement.executeQuery();
+
+            // Limpiar el JComboBox antes de agregar los nombres de autores
+            comboBox.removeAllItems();
+            comboBox.addItem("Seleccione");
+            while (resultado.next()) {
+                String nombreAutor = resultado.getString("nombre");
+                comboBox.addItem(nombreAutor);
+            }
+
+            // Cerrar los recursos
+            resultado.close();
+            statement.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            BasedeDatos.desconectar(); // Cerrar la conexión
+        }
+    }
 
     public static List<String> obtenerCategoriasP() {
         List<String> categorias = new ArrayList<>();
@@ -94,6 +119,58 @@ public class PrestamosDAO {
 
         return mensaje;
     }
+    
+    public static DefaultTableModel busquedaBL2(String nombreSeleccion,int categoria) {
+    DefaultTableModel modelo = new DefaultTableModel();
+
+    // Definimos las columnas del modelo
+   modelo.addColumn("ID Libro");
+        modelo.addColumn("ISBN");
+        modelo.addColumn("Título");
+        modelo.addColumn("Disponibles");
+        modelo.addColumn("Prestados");
+
+    String sql = "SELECT id_libro, isbn, titulo, cantidad as DISPONIBLE, prestado as PRESTADOS FROM libros WHERE id_libro LIKE ? OR isbn LIKE ? OR titulo LIKE ? AND categoria = ?";
+
+    try {
+        BasedeDatos.conectar();
+        PreparedStatement stmt = BasedeDatos.conexion.prepareStatement(sql);
+        String parametro = "%" + nombreSeleccion + "%";
+        stmt.setString(1, parametro);
+        stmt.setString(2, parametro);
+        stmt.setString(3, parametro);
+         stmt.setInt(4, categoria);
+
+
+        ResultSet result = stmt.executeQuery();
+
+        if (result != null) {
+            while (result.next()) {
+                    int id_libro = result.getInt("id_libro");
+                    String isbn = result.getString("isbn");
+                    String titulo = result.getString("Titulo");
+                    int cantidad = result.getInt("DISPONIBLE");
+                    int prestado = result.getInt("PRESTADOS");
+
+                    LibrosDTO librosDTO = new LibrosDTO();
+                    librosDTO.setIdLibro(result.getInt("id_libro"));
+
+                    System.out.println("ID LIBRO: " + librosDTO.getIdLibro());
+
+                    // Agregamos los datos al modelo
+                    Object[] fila = {id_libro, isbn, titulo, cantidad, prestado};
+                    modelo.addRow(fila);
+                }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        System.out.println("Error consultando admins");
+    } finally {
+        BasedeDatos.desconectar(); // Cerrar la conexión
+    }
+
+    return modelo;
+}
 
     public static DefaultTableModel tablaLibrosDisponibles(int idCategoria) {
         DefaultTableModel modelo = new DefaultTableModel();

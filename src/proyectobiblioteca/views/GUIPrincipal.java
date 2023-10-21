@@ -358,9 +358,11 @@ public class GUIPrincipal extends JFrame {
         table.setSelectionForeground(Color.BLACK);
 
 // Crear los botones
+        ImageIcon iconoNuevo = new ImageIcon("resources/nuevoUser.png");
         JButton nuevoButton = new JButton("Nuevo");
         nuevoButton.setBackground(verde);
         nuevoButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        nuevoButton.setIcon(iconoNuevo);
         JButton editarButton = new JButton("Editar");
         editarButton.setBackground(verde);
         editarButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
@@ -961,6 +963,17 @@ public class GUIPrincipal extends JFrame {
         c.gridy = 1;
         panel.add(lblUsuarioEncontrado, c);
 
+        JCheckBox acta = new JCheckBox("Tiene acta");
+
+        // Aplicar estilos personalizados para que se parezca a Bootstrap
+        acta.setOpaque(false); // Hacer el fondo transparente
+        acta.setFont(new Font("Arial", Font.PLAIN, 14)); // Establecer la fuente
+        acta.setForeground(new Color(0, 0, 0)); // Color del texto
+        acta.setBorderPaintedFlat(true); // Quitar el bord
+        c.gridx = 2;
+        c.gridy = 1;
+        panel.add(acta, c);
+
         // Crear un JLabel para el cuadro de búsqueda de usuarios
         JLabel lblTipoPrestamo = new JLabel("Tipo:");
         lblTipoPrestamo.setVisible(false);
@@ -982,7 +995,7 @@ public class GUIPrincipal extends JFrame {
 
         JLabel lblLibrosS = new JLabel("Buscar:");
         lblLibrosS.setVisible(false);
-        c.gridx = 1;
+        c.gridx = 0;
         c.gridy = 2;
         panel.add(lblLibrosS, c);
 
@@ -993,7 +1006,7 @@ public class GUIPrincipal extends JFrame {
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
         cuadroBusquedaLibros.setVisible(false);
-        c.gridx = 3;
+        c.gridx = 1;
         c.gridy = 2;
         panel.add(cuadroBusquedaLibros, c);
 
@@ -1001,9 +1014,9 @@ public class GUIPrincipal extends JFrame {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setVisible(false);
         scrollPane.setPreferredSize(new Dimension(500, 200));
-        c.gridx = 1;
-        c.gridy = 4;
-        c.gridwidth = 2;
+        c.gridx = 0;
+        c.gridy = 3;
+        c.gridwidth = -1;
         panel.add(scrollPane, c);
 
         JButton realizarPrestamo = new JButton("Realizar Prestamo");
@@ -1011,10 +1024,28 @@ public class GUIPrincipal extends JFrame {
         realizarPrestamo.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         realizarPrestamo.setVisible(false);
         realizarPrestamo.setPreferredSize(new Dimension(200, 100));
-        c.gridx = 1;
-        c.gridy = 6;
+        c.gridx = 3;
+        c.gridy = 3;
         panel.add(realizarPrestamo, c);
         ////////////////////////////////////////////////
+        JLabel lblAsignatura = new JLabel("Asignatura:");
+        lblAsignatura.setVisible(true);
+        c.gridx = 2;
+        c.gridy = 2;
+        panel.add(lblAsignatura, c);
+
+        JComboBox<String> comAsignatura = new JComboBox<>();
+        PrestamosDAO.cargarAsignatura(comAsignatura);
+        comAsignatura.setPreferredSize(new Dimension(250, 30));
+        c.gridx = 3;
+        c.gridy = 2;
+        panel.add(comAsignatura, c);
+
+        
+        
+        
+        
+        
         comboBox.setPreferredSize(new Dimension(250, 30));
 
         // Aplicar la decoración de autocompletado al JComboBox
@@ -1036,6 +1067,60 @@ public class GUIPrincipal extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 table.setModel(PrestamosDAO.tablaLibrosDisponibles(comboBox.getSelectedIndex()));
 
+            }
+        });
+
+        realizarPrestamo.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                realizarPrestamo.setBackground(new Color(173, 216, 230)); // Color verde claro
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                realizarPrestamo.setBackground(verde);
+
+            }
+        });
+        
+        cuadroBusquedaLibros.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                buscar();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                buscar();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                buscar();
+            }
+
+            // Método de búsqueda
+            public void buscar() {
+                int catSelect=comboBox.getSelectedIndex();
+                if (catSelect==0) {
+                    JOptionPane.showMessageDialog(null, "Selecciona un categoria para que puedas continuar con la busqueda");
+                }else{
+                String texto = cuadroBusquedaLibros.getText();
+                table.setModel(PrestamosDAO.busquedaBL2(texto,catSelect));
+                }
             }
         });
 

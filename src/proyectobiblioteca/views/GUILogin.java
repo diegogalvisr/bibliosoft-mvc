@@ -5,7 +5,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import javax.swing.*;
+
 import proyectobiblioteca.controllers.adminsDAO;
 
 public class GUILogin extends JFrame {
@@ -131,8 +134,10 @@ public class GUILogin extends JFrame {
                 }
             }
         });
+        loginButton.setBackground(Color.BLUE);
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                // Acción cuando se hace clic en el botón
                 String usuario = usuarioField.getText();
                 GUIPrincipal formPrin = new GUIPrincipal(usuario);
                 System.out.println(usuario);
@@ -145,17 +150,42 @@ public class GUILogin extends JFrame {
                         setVisible(false);
                     } else {
                         JOptionPane.showMessageDialog(null, "Bienvenido al sistema ingresas como Auxiliar");
-                        /*        GUIPrincipalAuxiliares formPrin=new GUIPrincipalAuxiliares();
-                   formPrin.setVisible(true);
-                   setVisible(false);*/
+                        /* GUIPrincipalAuxiliares formPrin = new GUIPrincipalAuxiliares();
+                formPrin.setVisible(true);
+                setVisible(false);*/
                     }
-
                 } else {
                     JOptionPane.showMessageDialog(null, "INCORRECTO");
                 }
+            }
+        });
+
+// Para capturar el evento "MouseEntered" del botón loginButton
+        loginButton.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+        loginButton.setBackground(new Color(0, 156, 223));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                        loginButton.setBackground(new Color(0,134,190));
 
             }
         });
+
     }
 
     public void pintarPanelIzquierdo() {
