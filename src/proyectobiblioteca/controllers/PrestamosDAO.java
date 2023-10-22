@@ -2,10 +2,14 @@ package proyectobiblioteca.controllers;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import proyectobiblioteca.config.BasedeDatos;
 import proyectobiblioteca.models.LibrosDTO;
@@ -38,7 +42,7 @@ public class PrestamosDAO {
             BasedeDatos.desconectar(); // Cerrar la conexión
         }
     }
-    
+
     public static void cargarAsignatura(JComboBox<String> comboBox) {
         try {
             BasedeDatos.conectar();
@@ -90,62 +94,32 @@ public class PrestamosDAO {
         return categorias;
     }
 
-    /* public static void insertarAdmin(adminsDTO admin) {
-        try {
-            BasedeDatos.conectar();
-            String consulta = "INSERT INTO admins (usuario, clave, nombre, apellido, direccion, cargo) VALUES (?, ?, ?, ?, ?, ?)";
-            PreparedStatement statement = BasedeDatos.conexion.prepareStatement(consulta);
-            statement.setString(1, admin.getUsuario());
-            statement.setString(2, admin.getClave());
-            statement.setString(3, admin.getNombres());
-            statement.setString(4, admin.getApellidos());
-            statement.setString(5, admin.getDireccion());
-            statement.setInt(6, admin.getCargo());
-            statement.executeUpdate();
-            // BasedeDatos.desconectar();
-// Crea un nuevo JDialog personalizado
 
-// Muestra un mensaje en el cuadro de diálogo
-            JOptionPane.showMessageDialog(null, "Se ha agregado exitosamente el usuario " + admin.getUsuario());
+    public static DefaultTableModel busquedaBL2(String nombreSeleccion, int categoria) {
+        DefaultTableModel modelo = new DefaultTableModel();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            BasedeDatos.desconectar(); // Cerrar la conexión
-        }
-    }*/
-    public String buscarUsuario() {
-        String mensaje = "Hola";
-
-        return mensaje;
-    }
-    
-    public static DefaultTableModel busquedaBL2(String nombreSeleccion,int categoria) {
-    DefaultTableModel modelo = new DefaultTableModel();
-
-    // Definimos las columnas del modelo
-   modelo.addColumn("ID Libro");
+        // Definimos las columnas del modelo
+        modelo.addColumn("ID Libro");
         modelo.addColumn("ISBN");
         modelo.addColumn("Título");
         modelo.addColumn("Disponibles");
         modelo.addColumn("Prestados");
 
-    String sql = "SELECT id_libro, isbn, titulo, cantidad as DISPONIBLE, prestado as PRESTADOS FROM libros WHERE id_libro LIKE ? OR isbn LIKE ? OR titulo LIKE ? AND categoria = ?";
+        String sql = "SELECT id_libro, isbn, titulo, cantidad as DISPONIBLE, prestado as PRESTADOS FROM libros WHERE id_libro LIKE ? OR isbn LIKE ? OR titulo LIKE ? AND categoria = ?";
 
-    try {
-        BasedeDatos.conectar();
-        PreparedStatement stmt = BasedeDatos.conexion.prepareStatement(sql);
-        String parametro = "%" + nombreSeleccion + "%";
-        stmt.setString(1, parametro);
-        stmt.setString(2, parametro);
-        stmt.setString(3, parametro);
-         stmt.setInt(4, categoria);
+        try {
+            BasedeDatos.conectar();
+            PreparedStatement stmt = BasedeDatos.conexion.prepareStatement(sql);
+            String parametro = "%" + nombreSeleccion + "%";
+            stmt.setString(1, parametro);
+            stmt.setString(2, parametro);
+            stmt.setString(3, parametro);
+            stmt.setInt(4, categoria);
 
+            ResultSet result = stmt.executeQuery();
 
-        ResultSet result = stmt.executeQuery();
-
-        if (result != null) {
-            while (result.next()) {
+            if (result != null) {
+                while (result.next()) {
                     int id_libro = result.getInt("id_libro");
                     String isbn = result.getString("isbn");
                     String titulo = result.getString("Titulo");
@@ -161,16 +135,16 @@ public class PrestamosDAO {
                     Object[] fila = {id_libro, isbn, titulo, cantidad, prestado};
                     modelo.addRow(fila);
                 }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error consultando admins");
+        } finally {
+            BasedeDatos.desconectar(); // Cerrar la conexión
         }
-    } catch (Exception e) {
-        e.printStackTrace();
-        System.out.println("Error consultando admins");
-    } finally {
-        BasedeDatos.desconectar(); // Cerrar la conexión
-    }
 
-    return modelo;
-}
+        return modelo;
+    }
 
     public static DefaultTableModel tablaLibrosDisponibles(int idCategoria) {
         DefaultTableModel modelo = new DefaultTableModel();
@@ -242,6 +216,97 @@ public class PrestamosDAO {
         return nombre;
     }
 
+    public static int obtenerIDAdmin(String usuario) {
+        int idAdmin = 0000; // Valor por defecto si no se encuentra el usuario
+        try {
+            BasedeDatos.conectar();
+            String consulta = "SELECT id_admin FROM admins WHERE usuario = ?";
+            PreparedStatement statement = BasedeDatos.conexion.prepareStatement(consulta);
+            statement.setString(1, usuario);
+            ResultSet resultado = statement.executeQuery();
+            if (resultado.next()) {
+                idAdmin = resultado.getInt("id_admin");
+            }
+            // Cerrar los recursos
+            resultado.close();
+            statement.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            BasedeDatos.desconectar(); // Cerrar la conexión
+        }
+        return idAdmin;
+    }
+    
+    public static int obtenerIDUsuario(int usuario) {
+        int idAdmin = 0000; // Valor por defecto si no se encuentra el usuario
+        try {
+            BasedeDatos.conectar();
+            String consulta = "SELECT id_usuario FROM usuarios WHERE user_generico = ?";
+            PreparedStatement statement = BasedeDatos.conexion.prepareStatement(consulta);
+            statement.setInt(1, usuario);
+            ResultSet resultado = statement.executeQuery();
+            if (resultado.next()) {
+                idAdmin = resultado.getInt("id_usuario");
+            }
+            // Cerrar los recursos
+            resultado.close();
+            statement.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            BasedeDatos.desconectar(); // Cerrar la conexión
+        }
+        return idAdmin;
+    }
+
+  public static void insertarPrestamo(PrestamosDTO prestamo) {
+    try {
+        BasedeDatos.conectar();
+        String consulta = "INSERT INTO prestamos (tipo_prestamo, id_admin, id_usuario, id_libro, asignatura, fecha_inicial, fecha_final, estado, acta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        PreparedStatement statement = BasedeDatos.conexion.prepareStatement(consulta, Statement.RETURN_GENERATED_KEYS);
+        statement.setString(1, String.valueOf(prestamo.getTipo_prestamo()));
+        statement.setInt(2, prestamo.getAdmin());
+        statement.setInt(3, prestamo.getUsuario());
+        statement.setInt(4, prestamo.getLibroID());
+        statement.setInt(5, prestamo.getAsignaturaID());
+
+        // Convierte LocalDate a java.sql.Date
+        java.sql.Date sqlFechaInicial = java.sql.Date.valueOf(prestamo.getFecha_inicial());
+        java.sql.Date sqlFechaFinal = java.sql.Date.valueOf(prestamo.getFecha_final());
+
+        statement.setDate(6, sqlFechaInicial);
+        statement.setDate(7, sqlFechaFinal);
+        statement.setInt(8, 1);
+        statement.setString(9, prestamo.getActa());
+
+        int affectedRows = statement.executeUpdate();
+
+        if (affectedRows == 0) {
+            throw new SQLException("La inserción del préstamo falló, no se insertaron filas.");
+        }
+
+        ResultSet generatedKeys = statement.getGeneratedKeys();
+        if (generatedKeys.next()) {
+            int idPrestamo = generatedKeys.getInt(1);
+
+            // Actualizar el libro prestado
+            String updateLibroQuery = "UPDATE libros SET cantidad = cantidad - 1, prestado = prestado + 1 WHERE id_libro = ?";
+            PreparedStatement updateLibroStatement = BasedeDatos.conexion.prepareStatement(updateLibroQuery);
+            updateLibroStatement.setInt(1, prestamo.getLibroID());
+            updateLibroStatement.executeUpdate();
+
+            JOptionPane.showMessageDialog(null, "Se ha agregado exitosamente el préstamo al usuario: " + prestamo.getUsuario());
+        } else {
+            throw new SQLException("La inserción del préstamo falló, no se generó el ID del préstamo.");
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    } finally {
+        BasedeDatos.desconectar(); // Cerrar la conexión
+    }
+}
+
     public DefaultTableModel tablaPrestamos() {
         DefaultTableModel modelo = new DefaultTableModel();
         modelo.addColumn("ID");
@@ -266,8 +331,14 @@ public class PrestamosDAO {
                     PDTO.setUsuario(resultado.getInt("id_usuario"));
                     PDTO.setLibro(resultado.getString("Libro"));
                     PDTO.setAsignatura(resultado.getString("asignatura"));
-                    PDTO.setFecha_inicial(resultado.getDate("fecha_inicial"));
-                    PDTO.setFecha_final(resultado.getDate("fecha_final"));
+                    java.sql.Date sqlFechaInicial = resultado.getDate("fecha_inicial");
+                    java.sql.Date sqlFechaFinal = resultado.getDate("fecha_final");
+                    LocalDate fechaInicial = sqlFechaInicial.toLocalDate();
+                    LocalDate fechaFinal = sqlFechaFinal.toLocalDate();
+
+// Luego, puedes establecer las fechas en tu objeto PDTO
+                    PDTO.setFecha_inicial(fechaInicial);
+                    PDTO.setFecha_final(fechaFinal);
                     PDTO.setEstado(resultado.getString("Estado"));
                     PDTO.setActa(resultado.getString("Acta"));
                     Object[] fila = {PDTO.getId_prestamo(), PDTO.getTipo_prestamo(), PDTO.getAdmin(), PDTO.getUsuario(), PDTO.getLibro(), PDTO.getAsignatura(), PDTO.getFecha_inicial(), PDTO.getFecha_final(), PDTO.getEstado(), PDTO.getActa()};

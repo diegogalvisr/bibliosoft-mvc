@@ -1,8 +1,8 @@
 package proyectobiblioteca.views;
 
 import java.awt.*;
-import static java.awt.Color.blue;
 import java.awt.event.*;
+import java.time.LocalDate;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.Random;
@@ -16,12 +16,10 @@ import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicToggleButtonUI;
-import org.jdesktop.swingx.JXComboBox;
-import org.jdesktop.swingx.JXComboBox;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
-import org.jdesktop.swingx.combobox.ListComboBoxModel;
 import proyectobiblioteca.controllers.*;
 import proyectobiblioteca.models.LibrosDTO;
+import proyectobiblioteca.models.PrestamosDTO;
 import proyectobiblioteca.models.UsuariosDTO;
 import proyectobiblioteca.models.adminsDTO;
 
@@ -53,7 +51,6 @@ public class GUIPrincipal extends JFrame {
         } else {
             pintarPanelIzquierdo();
             initComponents();
-
             // Obtener el tamaño de la pantalla
             Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
@@ -1040,17 +1037,10 @@ public class GUIPrincipal extends JFrame {
         c.gridx = 3;
         c.gridy = 2;
         panel.add(comAsignatura, c);
-
-        
-        
-        
-        
-        
         comboBox.setPreferredSize(new Dimension(250, 30));
 
         // Aplicar la decoración de autocompletado al JComboBox
         AutoCompleteDecorator.decorate(comboBox);
-
         lblBuscarUsuarios.setVisible(true);
         cuadroBusquedaUsuarios.setEditable(true);
         cuadroBusquedaUsuarios.setText("");
@@ -1073,6 +1063,42 @@ public class GUIPrincipal extends JFrame {
         realizarPrestamo.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                int usuarioSele = Integer.parseInt(cuadroBusquedaUsuarios.getText());
+                int filaSeleccionada = table.getSelectedRow();
+                int asigSeleccionada = comAsignatura.getSelectedIndex();
+                boolean tieneA = acta.isSelected();
+                int pA = 0;
+                if (tieneA == true) {
+                    pA = 1;
+                } else {
+                    pA = 0;
+                }
+                int idUserLog = PrestamosDAO.obtenerIDAdmin(usuarioLog);
+                LocalDate fechaActual = LocalDate.now(); // Obtiene la fecha actual
+                LocalDate fechaEnTresDias = fechaActual.plusDays(7);
+
+                if (filaSeleccionada < 0) {
+                    JOptionPane.showMessageDialog(null, "Es necesario que seleccione un libro de la tabla para prestar");
+                    return;
+                }
+                int id_libro = (int) table.getValueAt(filaSeleccionada, 0);
+             /*   ;
+                JOptionPane.showMessageDialog(null, "\nUsuario: " + usuarioSele
+                        + "\nLibro: " + id_libro + "\nAsignatura: "
+                        + asigSeleccionada + "Fecha Inicial: " + fechaActual
+                        + "\nFecha Final: " + fechaEnTresDias + "Tiene acta: " + tieneA + "\n Usuario Logeado: " + idUserLog);*/
+                                
+
+                PrestamosDTO prestamos = new PrestamosDTO();
+                prestamos.setTipo_prestamo(cuadroTipoPrest.getText().charAt(0));
+                prestamos.setAdmin(idUserLog);
+                prestamos.setUsuario(PrestamosDAO.obtenerIDUsuario(usuarioSele));
+                prestamos.setLibroID(id_libro);
+                prestamos.setAsignaturaID(asigSeleccionada);
+                prestamos.setFecha_inicial(fechaActual);
+                prestamos.setFecha_final(fechaEnTresDias);
+                prestamos.setActa(Integer.toString(pA));
+                PrestamosDAO.insertarPrestamo(prestamos);
             }
 
             @Override
@@ -1095,7 +1121,7 @@ public class GUIPrincipal extends JFrame {
 
             }
         });
-        
+
         cuadroBusquedaLibros.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -1114,12 +1140,12 @@ public class GUIPrincipal extends JFrame {
 
             // Método de búsqueda
             public void buscar() {
-                int catSelect=comboBox.getSelectedIndex();
-                if (catSelect==0) {
+                int catSelect = comboBox.getSelectedIndex();
+                if (catSelect == 0) {
                     JOptionPane.showMessageDialog(null, "Selecciona un categoria para que puedas continuar con la busqueda");
-                }else{
-                String texto = cuadroBusquedaLibros.getText();
-                table.setModel(PrestamosDAO.busquedaBL2(texto,catSelect));
+                } else {
+                    String texto = cuadroBusquedaLibros.getText();
+                    table.setModel(PrestamosDAO.busquedaBL2(texto, catSelect));
                 }
             }
         });
