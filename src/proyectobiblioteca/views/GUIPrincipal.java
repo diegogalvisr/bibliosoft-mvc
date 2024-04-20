@@ -36,14 +36,18 @@ public class GUIPrincipal extends JFrame {
     private JButton botonHome, botonAdmins, botonUsers, botonLibros;
     private final Container container = getContentPane();
     adminsDAO ADMINSdao = new adminsDAO();
+    adminsDTO modeloDTO = new adminsDTO();
     PrestamosDAO prestamosDAO = new PrestamosDAO();
     UsuariosDAO usuariosDAO = new UsuariosDAO();
     LibrosDAO librosDAO = new LibrosDAO();
 
     private String usuarioLog;/// me guarda el usuario logeado
+    private int idUserLogeado;
 
-    public GUIPrincipal(String user) {
+    public GUIPrincipal(String user, int cargo) {
         this.usuarioLog = user;
+        this.idUserLogeado = cargo;
+        System.out.println("USUARIO LOGEADO: " + user + " CARGO:" + cargo);
         if (!logeo) {
             JOptionPane.showMessageDialog(rootPane, "Debes logearte para ingresar a este menú");
             GUILogin GL = new GUILogin();
@@ -92,8 +96,11 @@ public class GUIPrincipal extends JFrame {
         container.add(panelPrin, BorderLayout.CENTER);
 
         accionHome();
+
         pintarMenuHome();
-        pintarMenuAdmins();
+        if (idUserLogeado == 1) {
+            pintarMenuAdmins();
+        }
         pintarMenuUsers();
         pintarMenuLibros();
         pintarMenuPrestamos();
@@ -102,15 +109,13 @@ public class GUIPrincipal extends JFrame {
 
     private void accionHome() {
         panelAbajo.removeAll();
+
         jLabelTop.setText("dashboard/home");
         panelAbajo.setLayout(new FlowLayout());
 
         JToggleButton botonAdmin = new JToggleButton("Administradores");
         botonAdmin.setUI(new BootstrapSwitchUI()); // Aplica la clase UI personalizada
         botonAdmin.setPreferredSize(new Dimension(200, 150));
-
-        // Establece el icono en el botón
-        // botonAdmin.setIcon(new ImageIcon(getClass().getResource("/resources/iconAdmin.png")));
         botonAdmin.setBackground(verde);
         botonAdmin.addMouseListener(new MouseAdapter() {
             @Override
@@ -138,6 +143,8 @@ public class GUIPrincipal extends JFrame {
             }
         });
 
+        // Establece el icono en el botón
+        // botonAdmin.setIcon(new ImageIcon(getClass().getResource("/resources/iconAdmin.png")));
         JToggleButton botonUser = new JToggleButton("Usuarios");
         botonUser.setUI(new BootstrapSwitchUI()); // Aplica la clase UI personalizada
         botonUser.setPreferredSize(new Dimension(200, 150));
@@ -173,7 +180,10 @@ public class GUIPrincipal extends JFrame {
 
         ////////////////////////
         panelAbajo.setLayout(new FlowLayout());
-        panelAbajo.add(botonAdmin);
+        /*ESTABLECE BOTONES SEGUN EL CARGO DEL USUARIO*/
+        if (idUserLogeado == 1) {
+            panelAbajo.add(botonAdmin);
+        }
         panelAbajo.add(botonUser);
 
         panelAbajo.repaint();
@@ -527,9 +537,13 @@ public class GUIPrincipal extends JFrame {
                     return;
                 }
                 int idAdmin = (int) table.getValueAt(filaSeleccionada, 0);
-                UsuariosDAO.eliminarUser(idAdmin);
-                System.out.println(idAdmin);
-                table.setModel(usuariosDAO.tablaUsers());
+                String[] opciones = {"Sí,eliminalo", "No,dejame confirmo"};
+                int confirmacion = JOptionPane.showOptionDialog(null, "¿Está seguro de eliminar al usuario: " + idAdmin + "?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, opciones, opciones[1]);
+                if (confirmacion == JOptionPane.YES_OPTION) {
+                    UsuariosDAO.eliminarUser(idAdmin);
+                    System.out.println(idAdmin);
+                    table.setModel(usuariosDAO.tablaUsers());
+                }
             }
         });
 
@@ -882,6 +896,7 @@ public class GUIPrincipal extends JFrame {
                     txtNombre.setText("");
                     txtApellido.setText("");
                     txtDireccion.setText("");
+                    accionAdmins();
 
                 }
             }
@@ -1082,12 +1097,11 @@ public class GUIPrincipal extends JFrame {
                     return;
                 }
                 int id_libro = (int) table.getValueAt(filaSeleccionada, 0);
-             /*   ;
+                /*   ;
                 JOptionPane.showMessageDialog(null, "\nUsuario: " + usuarioSele
                         + "\nLibro: " + id_libro + "\nAsignatura: "
                         + asigSeleccionada + "Fecha Inicial: " + fechaActual
                         + "\nFecha Final: " + fechaEnTresDias + "Tiene acta: " + tieneA + "\n Usuario Logeado: " + idUserLog);*/
-                                
 
                 PrestamosDTO prestamos = new PrestamosDTO();
                 prestamos.setTipo_prestamo(cuadroTipoPrest.getText().charAt(0));
@@ -1388,10 +1402,9 @@ public class GUIPrincipal extends JFrame {
         JLabel lblCategoria = new JLabel("Categoria:");
         lblCategoria.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
         lblCategoria.setForeground(new Color(52, 58, 64));
-
-        JTextField txtCategoria = new JTextField();
-        txtCategoria.setPreferredSize(new Dimension(250, 30));
-        txtCategoria.setBorder(BorderFactory.createLineBorder(new Color(108, 117, 125)));
+        
+        JComboBox<String> txtCategoria = new JComboBox<>();
+        librosDAO.cargarCategorias(txtCategoria);
 
         JLabel lblCantidad = new JLabel("Cantidad:");
         lblCantidad.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
@@ -1525,7 +1538,7 @@ public class GUIPrincipal extends JFrame {
 
         enviar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (txtISBN.getText().isEmpty() || txtTitulo.getText().isEmpty() || txtCategoria.getText().isEmpty() || txtContenido.getText().isEmpty()) {
+                if (txtISBN.getText().isEmpty() || txtTitulo.getText().isEmpty() || txtContenido.getText().isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Todos los campos son requeridos");
                 } else {
                     LibrosDTO libros = new LibrosDTO();
@@ -1537,7 +1550,7 @@ public class GUIPrincipal extends JFrame {
                     libros.setTipoLibro(txtTPLibro.getText());
                     libros.setPrecio(Integer.parseInt(txtPrecio.getText()));
                     libros.setContMaterial(txtContenido.getText());
-                    libros.setCategoria(txtCategoria.getText());
+                    libros.setidCategoria(txtCategoria.getSelectedIndex());
                     libros.setCantidad(Integer.parseInt(txtCantidad.getText()));
                     librosDAO.insertarLibro(libros);
 
@@ -1546,7 +1559,6 @@ public class GUIPrincipal extends JFrame {
                     txtTPLibro.setText("");
                     txtPrecio.setText("");
                     txtContenido.setText("");
-                    txtCategoria.setText("");
                     txtCantidad.setText("");
 
                     accionLibros();
@@ -1966,7 +1978,6 @@ public class GUIPrincipal extends JFrame {
                     txtApellido.setText("");
                     txtDireccion.setText("");
                     JBCargo.setSelectedIndex(0);
-
                 }
             }
         });
@@ -2006,10 +2017,21 @@ public class GUIPrincipal extends JFrame {
         JLabel lblCategoria = new JLabel("Categoria:");
         lblCategoria.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
         lblCategoria.setForeground(new Color(52, 58, 64));
-
-        JTextField txtCategoria = new JTextField();
-        txtCategoria.setPreferredSize(new Dimension(250, 30));
-        txtCategoria.setBorder(BorderFactory.createLineBorder(new Color(108, 117, 125)));
+        
+        JComboBox<String> txtCategoria = new JComboBox<>();
+        librosDAO.cargarCategorias(txtCategoria);
+        
+         String cargoBuscadoCAT = (String) datosFila.get(8);
+        int itemCountCat = txtCategoria.getItemCount();
+        int indexCategoria = -1; 
+        for (int i = 0; i < itemCountCat; i++) {
+            String itemCategoria = (String) txtCategoria.getItemAt(i);
+            if (itemCategoria.equals(cargoBuscadoCAT)) {
+                indexCategoria = i;
+                break;
+            }
+        }
+        txtCategoria.setSelectedIndex(indexCategoria);
 
         JLabel lblCantidad = new JLabel("Cantidad:");
         lblCantidad.setFont(new Font("Helvetica Neue", Font.PLAIN, 16));
@@ -2150,7 +2172,7 @@ public class GUIPrincipal extends JFrame {
         gbc.gridx = 3; // Cambia el valor de gridx para el campo de texto de Categoría
         panelAbajo.add(txtCategoria, gbc);
 
-        txtCategoria.setText((String) datosFila.get(8));
+       // txtCategoria.setText((String) datosFila.get(8));
 
         gbc.gridx = 0;
         gbc.gridy = 8;
@@ -2184,7 +2206,7 @@ public class GUIPrincipal extends JFrame {
 
         enviar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (txtISBN.getText().isEmpty() || txtTitulo.getText().isEmpty() || txtCategoria.getText().isEmpty() || txtContenido.getText().isEmpty()) {
+                if (txtISBN.getText().isEmpty() || txtTitulo.getText().isEmpty() || txtContenido.getText().isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Todos los campos son requeridos");
                 } else {
                     LibrosDTO libros = new LibrosDTO();
@@ -2196,7 +2218,7 @@ public class GUIPrincipal extends JFrame {
                     libros.setTipoLibro(txtTPLibro.getText());
                     libros.setPrecio(Integer.parseInt(txtPrecio.getText()));
                     libros.setContMaterial(txtContenido.getText());
-                    libros.setCategoria(txtCategoria.getText());
+                    libros.setidCategoria(txtCategoria.getSelectedIndex());
                     libros.setCantidad(Integer.parseInt(txtCantidad.getText()));
                     librosDAO.actualizarLibro(libros);
                     txtISBN.setText("");
@@ -2204,8 +2226,8 @@ public class GUIPrincipal extends JFrame {
                     txtTPLibro.setText("");
                     txtPrecio.setText("");
                     txtContenido.setText("");
-                    txtCategoria.setText("");
                     txtCantidad.setText("");
+                    accionLibros();
                 }
             }
         });
@@ -2298,23 +2320,20 @@ public class GUIPrincipal extends JFrame {
         JComboBox<String> JCGrado = new JComboBox<>();
 // Llamar al método para cargar los datos en el JComboBox
         usuariosDAO.cargarGrados(JCGrado);
+/*BUSCA EL INDICE DEL CUAL SE QUIERE EDITAR*/
+        String valorDeseado = String.valueOf(datosFila.get(7));
+        int indexDeseado = 0;
 
-        String valorDeseado = String.valueOf(datosFila.get(7)); // Convierte a cadena el valor de datosFila.get(7)
-        int indexDeseado = -1; // Inicializa el índice en -1 (fuera de los límites)
-
-// Busca el índice correspondiente al valor deseado
         for (int i = 0; i < JCGrado.getItemCount(); i++) {
             if (valorDeseado.equals(JCGrado.getItemAt(i))) {
                 indexDeseado = i;
-                break; // Detén la búsqueda una vez que encuentres la coincidencia
+                break; 
             }
         }
 
         if (indexDeseado != -1) {
-            JCGrado.setSelectedIndex(indexDeseado); // Establece el índice deseado
+            JCGrado.setSelectedIndex(indexDeseado);
         } else {
-            // El valor deseado no se encontró en el JComboBox
-            // Realiza alguna acción apropiada o muestra un mensaje de error
             JOptionPane.showMessageDialog(null, "El valor deseado no se encuentra en la lista.");
         }
 

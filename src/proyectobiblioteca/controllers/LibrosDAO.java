@@ -63,7 +63,7 @@ public class LibrosDAO {
 
         try {
             BasedeDatos.conectar();
-            ResultSet resultado = BasedeDatos.ejecutarSQL("SELECT id_libro, isbn, titulo, (SELECT nombre FROM editorial WHERE id_editorial = lb.id_editorial) as id_editorial, (SELECT nombre FROM autor WHERE id_autor = lb.id_autor) as id_autor, tipo_libro, precio, contMaterial, categoria, cantidad FROM libros lb;");
+            ResultSet resultado = BasedeDatos.ejecutarSQL("SELECT id_libro, isbn, titulo, (SELECT nombre FROM editorial WHERE id_editorial = lb.id_editorial) as id_editorial, (SELECT nombre FROM autor WHERE id_autor = lb.id_autor) as id_autor, tipo_libro, precio, contMaterial, (SELECT nombre FROM categoria WHERE id = lb.categoria) as categoria, cantidad FROM libros lb;");
             if (resultado != null) {
                 while (resultado.next()) {
                     int id_libro = resultado.getInt("id_libro");
@@ -236,6 +236,31 @@ comboBox.addItem("Seleccione");
             BasedeDatos.desconectar(); // Cerrar la conexión
         }
     }
+        public static void cargarCategorias(JComboBox<String> comboBox) {
+        try {
+            BasedeDatos.conectar();
+            String consulta = "SELECT nombre FROM categoria";
+            PreparedStatement statement = BasedeDatos.conexion.prepareStatement(consulta);
+            ResultSet resultado = statement.executeQuery();
+
+            // Limpiar el JComboBox antes de agregar los nombres de autores
+            comboBox.removeAllItems();
+comboBox.addItem("Seleccione");
+            while (resultado.next()) {
+                String nombreAutor = resultado.getString("nombre");
+                comboBox.addItem(nombreAutor);
+            }
+
+            // Cerrar los recursos
+            resultado.close();
+            statement.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            BasedeDatos.desconectar(); // Cerrar la conexión
+        }
+    }
+
 
     public static void eliminarLibro(int id_libro) {
         try {
@@ -265,7 +290,7 @@ comboBox.addItem("Seleccione");
         statement.setString(5, libro.getTipoLibro());
         statement.setDouble(6, libro.getPrecio());
         statement.setString(7, libro.getContMaterial());
-        statement.setString(8, libro.getCategoria());
+        statement.setInt(8, libro.getidCategoria());
         statement.setInt(9, libro.getCantidad());
         statement.setInt(10, libro.getIdLibro());
         statement.executeUpdate();

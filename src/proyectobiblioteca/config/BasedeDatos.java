@@ -23,7 +23,7 @@ public static void conectar() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             conexion = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/bdbibliosoft", "root", "");
+                    "jdbc:mysql://localhost:3306/bibliosoft", "root", "YkSoGeId");
         } catch (ClassNotFoundException | SQLException ex) {
              String logMessage = "Ocurrió un error: " + ex.getMessage()+" \nPonte en contacto con el administrador del sistema."; // Puedes personalizar el mensaje según tus necesidades
     // Mostrar el mensaje de registro en un JOptionPane

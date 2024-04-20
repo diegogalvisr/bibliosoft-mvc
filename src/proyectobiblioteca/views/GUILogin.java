@@ -10,6 +10,7 @@ import java.awt.event.MouseListener;
 import javax.swing.*;
 
 import proyectobiblioteca.controllers.adminsDAO;
+import proyectobiblioteca.models.adminsDTO;
 
 public class GUILogin extends JFrame {
 
@@ -106,26 +107,27 @@ public class GUILogin extends JFrame {
 
         panelPrin.setLayout(new BorderLayout());
         panelPrin.add(panelLogin, BorderLayout.CENTER);
-
+        /* Metodo para capturar tecla enter y hacer validacion de usuario**/
         passwordField.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String usuario = usuarioField.getText();
+                    GUIPrincipal formPrin; 
                     System.out.println(usuario);
                     System.out.println(passwordField.getText());
 
                     boolean esValido = adminsdao.validarUsuario(usuarioField.getText(), passwordField.getText());
                     if (esValido) {
                         if (adminsdao.cargo == 1) {
-                            JOptionPane.showMessageDialog(null, "Bienvenido al sistema ingresas como Administrador");
-                            GUIPrincipal formPrin = new GUIPrincipal(usuario);
-                            formPrin.setVisible(true);
-                            setVisible(false);
+                             formPrin = new GUIPrincipal(usuario,1);
+                        JOptionPane.showMessageDialog(null, "Bienvenido al sistema ingresas como Administrador");
+                        formPrin.setVisible(true);
+                        setVisible(false);
                         } else {
                             JOptionPane.showMessageDialog(null, "Bienvenido al sistema ingresas como Auxiliar");
-                            /*        GUIPrincipalAuxiliares formPrin=new GUIPrincipalAuxiliares();
-                   formPrin.setVisible(true);
-                   setVisible(false);*/
+                        formPrin = new GUIPrincipal(usuario,2);
+                        formPrin.setVisible(true);
+                        setVisible(false);
                         }
 
                     } else {
@@ -134,23 +136,29 @@ public class GUILogin extends JFrame {
                 }
             }
         });
+        /**Validacion de usuario mediante boton*/
         loginButton.setBackground(Color.BLUE);
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // Acción cuando se hace clic en el botón
                 String usuario = usuarioField.getText();
-                GUIPrincipal formPrin = new GUIPrincipal(usuario);
+                GUIPrincipal formPrin; 
                 System.out.println(usuario);
                 System.out.println(passwordField.getText());
                 boolean esValido = adminsdao.validarUsuario(usuarioField.getText(), passwordField.getText());
                 if (esValido) {
                     if (adminsdao.cargo == 1) {
+                        formPrin = new GUIPrincipal(usuario,1);
                         JOptionPane.showMessageDialog(null, "Bienvenido al sistema ingresas como Administrador");
                         formPrin.setVisible(true);
                         setVisible(false);
                     } else {
                         JOptionPane.showMessageDialog(null, "Bienvenido al sistema ingresas como Auxiliar");
-                        /* GUIPrincipalAuxiliares formPrin = new GUIPrincipalAuxiliares();
+                        formPrin = new GUIPrincipal(usuario,2);
+                        formPrin.setVisible(true);
+                        setVisible(false);
+
+                      /*  GUIPrincipalAuxiliares formPrin = new GUIPrincipalAuxiliares();
                 formPrin.setVisible(true);
                 setVisible(false);*/
                     }

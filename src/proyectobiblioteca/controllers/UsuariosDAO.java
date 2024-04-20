@@ -2,6 +2,7 @@ package proyectobiblioteca.controllers;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
@@ -10,36 +11,39 @@ import proyectobiblioteca.config.BasedeDatos;
 import proyectobiblioteca.models.UsuariosDTO;
 import proyectobiblioteca.models.adminsDTO;
 
+
 public class UsuariosDAO {
-
     public ArrayList<UsuariosDTO> obtenerUsers() {
-        ArrayList<UsuariosDTO> users = new ArrayList<>();
-        try {
-            BasedeDatos.conectar();
-            ResultSet resultado = BasedeDatos.ejecutarSQL("SELECT * FROM usuarios");
+    ArrayList<UsuariosDTO> users = new ArrayList<>();
+    try {
+        BasedeDatos.conectar();
+        ResultSet resultado = BasedeDatos.ejecutarSQL("SELECT * FROM usuarios");
 
-            if (resultado != null) { // Verificar que el resultado no sea null
-                while (resultado.next()) {
-                    int id_usuario = resultado.getInt("id_usuario");
-                    int user_generico = resultado.getInt("user_generico");
-                    String nombre = resultado.getString("nombre");
-                    String apellido = resultado.getString("apellido");
-                    String direccion = resultado.getString("direccion");
-                    String telefono = resultado.getString("telefono");
-                    String telefonoF = resultado.getString("telefonoF");
-                    int grado = resultado.getInt("grado");
-                    int id_multa = resultado.getInt("id_multa");
-                    users.add(new UsuariosDTO(id_usuario, user_generico, nombre, apellido, direccion, telefono, telefonoF, grado, id_multa));
-                }
-            } else {
-                System.out.println("No se pudo ejecutar la consulta SQL.");
+        if (resultado != null) { // Verificar que el resultado no sea null
+            while (resultado.next()) {
+                int id_usuario = resultado.getInt("id_usuario");
+                int user_generico = resultado.getInt("user_generico");
+                String nombre = resultado.getString("nombre");
+                String apellido = resultado.getString("apellido");
+                String direccion = resultado.getString("direccion");
+                String telefono = resultado.getString("telefono");
+                String telefonoF = resultado.getString("telefonoF");
+                int grado = resultado.getInt("grado");
+                int id_multa = resultado.getInt("id_multa");
+                users.add(new UsuariosDTO(id_usuario, user_generico, nombre, apellido, direccion, telefono, telefonoF, grado, id_multa));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } else {
+            System.out.println("No se pudo ejecutar la consulta SQL.");
         }
-
-        return users;
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(null, "He encontrado un error al momento de realizacion la gestion, porfavor contacte con soporte CODIGO: 000US", "ERROR - Bibliosoft", JOptionPane.WARNING_MESSAGE);
+        manejoErroresenBD.registrarError(e.getMessage(), "USUARIOS - GET");
+    } finally {
+        BasedeDatos.desconectar();
     }
+    return users;
+}
+
     
      public static void cargarGrados(JComboBox<String> comboBox) {
         try {
@@ -60,13 +64,14 @@ public class UsuariosDAO {
             resultado.close();
             statement.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "He encontrado un error al momento de realizacion la gestion, porfavor contacte con soporte CODIGO: 000US", "ERROR - Bibliosoft", JOptionPane.WARNING_MESSAGE);
+         manejoErroresenBD.registrarError(e.getMessage(), "USUARIOS - GRADOS");
         } finally {
             BasedeDatos.desconectar(); // Cerrar la conexión
         }
     }
 
-    public DefaultTableModel tablaUsers() {
+ public DefaultTableModel tablaUsers() {
     DefaultTableModel modelo = new DefaultTableModel();
 
     // Definimos las columnas del modelo
@@ -81,7 +86,7 @@ public class UsuariosDAO {
 
     try {
         BasedeDatos.conectar();
-        ResultSet resultado = BasedeDatos.ejecutarSQL("SELECT us.id_usuario, us.user_generico, us.nombre, us.apellido, us.direccion, us.telefono, us.telefonoF, gr.numero FROM usuarios us JOIN grados gr ON us.grado = gr.id");
+        ResultSet resultado = BasedeDatos.ejecutarSQL("SELECT us.id_usuario, us.user_generico, us.nombre, us.apellido, us.direccion, us.telefono, us.telefonoF, gr.numero FROM usuarios us JOIN grados gr ON us.grado = gr.id WHERE us.estado ='VIG'");
 
         if (resultado != null) { // Verificar que el resultado no sea null
             while (resultado.next()) {
@@ -102,15 +107,19 @@ public class UsuariosDAO {
             System.out.println("No se pudo ejecutar la consulta SQL.");
         }
     } catch (Exception e) {
-        e.printStackTrace();
+        JOptionPane.showMessageDialog(null, "He encontrado un error al momento de realizacion la gestion, porfavor contacte con soporte CODIGO: 000US", "ERROR - Bibliosoft", JOptionPane.WARNING_MESSAGE);
+         manejoErroresenBD.registrarError(e.getMessage(), "USUARIOS - LISTADO");
+    } finally {
+        BasedeDatos.desconectar();
     }
 
     return modelo;
 }
 
-    public DefaultTableModel busqueda(String nombreSeleccion) {
-        DefaultTableModel modelo = new DefaultTableModel();
 
+    public DefaultTableModel busqueda(String nombreSeleccion) {
+         BasedeDatos.conectar();
+        DefaultTableModel modelo = new DefaultTableModel();
         // Definimos las columnas del modelo
         modelo.addColumn("ID");
         modelo.addColumn("Usuario");
@@ -164,9 +173,11 @@ public class UsuariosDAO {
                 }
             }
         } catch (Exception e) {
-            System.out.println(e.toString());
-            System.out.println("Error consultando selecciones");
-        }
+         JOptionPane.showMessageDialog(null, "He encontrado un error al momento de realizacion la gestion, porfavor contacte con soporte CODIGO: 000US", "ERROR - Bibliosoft", JOptionPane.WARNING_MESSAGE);
+         manejoErroresenBD.registrarError(e.getMessage(), "USUARIOS - BUSQUEDA");
+        } finally {
+        BasedeDatos.desconectar();
+    }
 
         return modelo;
     }
@@ -174,7 +185,7 @@ public class UsuariosDAO {
     public static void insertarUser(UsuariosDTO admin) {
         try {
             BasedeDatos.conectar();
-            String consulta = "INSERT INTO usuarios (user_generico, nombre, apellido, direccion, telefono, telefonoF,grado) VALUES (?, ?, ?, ?, ?, ?,?)";
+            String consulta = "INSERT INTO usuarios (user_generico, nombre, apellido, direccion, telefono, telefonoF,grado,estado) VALUES (?, ?, ?, ?, ?, ?,?,?)";
             PreparedStatement statement = BasedeDatos.conexion.prepareStatement(consulta);
             statement.setInt(1, admin.getUser_generico());
             statement.setString(2, admin.getNombre());
@@ -183,17 +194,17 @@ public class UsuariosDAO {
             statement.setString(5, admin.getTelefono());
             statement.setString(6, admin.getTelefonoF());
             statement.setInt(7, admin.getGrado());
+            statement.setString(8, "VIG");
 
             statement.executeUpdate();
-            // BasedeDatos.desconectar();
-// Crea un nuevo JDialog personalizado
-
-// Muestra un mensaje en el cuadro de diálogo
             JOptionPane.showMessageDialog(null, "Se ha agregado exitosamente el usuario " + admin.getUser_generico());
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+       } catch (Exception e) {
+          JOptionPane.showMessageDialog(null, "He encontrado un error al momento de realizacion la gestion, porfavor contacte con soporte CODIGO: 000US", "ERROR - Bibliosoft", JOptionPane.WARNING_MESSAGE);
+         manejoErroresenBD.registrarError(e.getMessage(), "USUARIOS - INSERTAR");
+    } finally {
+        BasedeDatos.desconectar();
+    }
     }
     
     public static void actualizarUser(UsuariosDTO admin) {
@@ -212,23 +223,53 @@ public class UsuariosDAO {
             statement.executeUpdate();
          ///   BasedeDatos.desconectar();
             JOptionPane.showMessageDialog(null, "Se ha actualizado exitosamente el usuario " + admin.getUser_generico());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+         } catch (Exception e) {
+         JOptionPane.showMessageDialog(null, "He encontrado un error al momento de realizacion la gestion, porfavor contacte con soporte CODIGO: 000US", "ERROR - Bibliosoft", JOptionPane.WARNING_MESSAGE);
+         manejoErroresenBD.registrarError(e.getMessage(), "USUARIOS - ACTUALIZACION");
+    } finally {
+        BasedeDatos.desconectar();
     }
+    }
+public static boolean validarPrestamosActivos(int id_user) throws SQLException {
+    int totalPresActivos = 0;
+    try {
+        BasedeDatos.conectar();
+
+        // Consulta para contar los préstamos activos del usuario
+        String consultaPres = "SELECT COUNT(*) AS totalPresActivos " +
+                              "FROM usuarios u " +
+                              "INNER JOIN prestamos p ON p.id_usuario = u.id_usuario " +
+                              "WHERE u.id_usuario = ? AND p.estado = 1";
+        PreparedStatement statementPres = BasedeDatos.conexion.prepareStatement(consultaPres);
+        statementPres.setInt(1, id_user);
+        ResultSet rs = statementPres.executeQuery();
+        if (rs.next()) {
+            totalPresActivos = rs.getInt("totalPresActivos");
+        }
+        return totalPresActivos == 0;
+    } finally {
+        BasedeDatos.desconectar();
+    }
+}
+
+    
     public static void eliminarUser(int id_user) {
         try {
+            if (validarPrestamosActivos(id_user)) {
             BasedeDatos.conectar();
-            String consulta = "DELETE FROM usuarios WHERE id_usuario = ?";
+            String consulta = "UPDATE usuarios SET estado ='CAN' WHERE id_usuario = ?";
             PreparedStatement statement = BasedeDatos.conexion.prepareStatement(consulta);
             statement.setInt(1, id_user);
             statement.executeUpdate();
-            // BasedeDatos.desconectar();
-            JOptionPane.showMessageDialog(null, "Se ha eliminado correctamente el usuario.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            JOptionPane.showMessageDialog(null, "Se ha desativado correctamente el usuario.");
+            }else{
+            JOptionPane.showMessageDialog(null, "Este usuario cuenta con prestamos activos, verifica porfavor o de lo contrario contacte con soporte.");
+            }
+         } catch (Exception e) {
+         JOptionPane.showMessageDialog(null, "He encontrado un error al momento de realizacion la gestion, porfavor contacte con soporte CODIGO: 000US", "ERROR - Bibliosoft", JOptionPane.WARNING_MESSAGE);
+         manejoErroresenBD.registrarError(e.getMessage(), "USUARIOS - DESACTIVACION");
+    } finally {
+        BasedeDatos.desconectar();
     }
-
-
+    }
 }

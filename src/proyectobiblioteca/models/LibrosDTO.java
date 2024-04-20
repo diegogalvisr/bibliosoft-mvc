@@ -5,6 +5,7 @@ public class LibrosDTO {
     private int isbn;
     private String titulo;
     private int idEditorial;
+    private int idCategoria;
     private int idAutor;
     private String tipoLibro;
     private int precio;
@@ -16,11 +17,12 @@ public class LibrosDTO {
     public LibrosDTO() {
     }
 
-    public LibrosDTO(int idLibro, int isbn, String titulo, int idEditorial, int idAutor, String tipoLibro, int precio, String contMaterial, String categoria, int cantidad, int prestado) {
+    public LibrosDTO(int idLibro, int isbn, String titulo, int idEditorial, int idCategoria, int idAutor, String tipoLibro, int precio, String contMaterial, String categoria, int cantidad, int prestado) {
         this.idLibro = idLibro;
         this.isbn = isbn;
         this.titulo = titulo;
         this.idEditorial = idEditorial;
+        this.idCategoria=idCategoria;
         this.idAutor = idAutor;
         this.tipoLibro = tipoLibro;
         this.precio = precio;
@@ -33,7 +35,12 @@ public class LibrosDTO {
     public int getIdLibro() {
         return idLibro;
     }
-
+    public int getidCategoria(){
+    return idCategoria;
+    }
+    public void setidCategoria(int idCategoria) {
+        this.idCategoria = idCategoria;
+    }
     public void setIdLibro(int idLibro) {
         this.idLibro = idLibro;
     }
